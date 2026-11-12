@@ -107,7 +107,7 @@ button {
   max-width:1150px;
   margin:13px auto 0;
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:1fr 1fr 1fr;
   background:#111;
   padding:5px;
   border-radius:12px;
@@ -453,8 +453,6 @@ button {
   margin-top:12px;
 }
 
-/* FLYER THEMES */
-
 .theme-luxury .flyer-bg {
   background:
     radial-gradient(circle at 50% 10%,#795719,transparent 40%),
@@ -507,8 +505,6 @@ button {
 .theme-graduation .flyer-label {
   color:#9ed7ff;
 }
-
-/* CARTOON */
 
 .voice-card {
   padding:12px;
@@ -610,6 +606,133 @@ button {
   border-radius:12px;
 }
 
+/* =========================
+   ADAMI CODE BUILDER
+========================= */
+
+.code-rules {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.rule-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 14px;
+  background: rgba(255,255,255,.035);
+}
+
+.rule-icon {
+  font-size: 24px;
+  width: 36px;
+  text-align: center;
+}
+
+.rule-card strong {
+  display: block;
+  font-size: 14px;
+}
+
+.rule-card span {
+  display: block;
+  margin-top: 4px;
+  color: #aaa;
+  font-size: 12px;
+}
+
+.security-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.security-list div {
+  padding: 11px 12px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.035);
+  color: #ddd;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.field-label {
+  display: block;
+  margin-top: 18px;
+  margin-bottom: 7px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #aaa;
+}
+
+.text-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: #111;
+  color: #fff;
+  font: inherit;
+  outline: none;
+}
+
+.text-input:focus {
+  border-color: #d6b45a;
+}
+
+.code-limit-box {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.code-limit-box strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.limit-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  font-size: 13px;
+}
+
+.limit-row:last-child {
+  border-bottom: none;
+}
+
+.limit-row span {
+  color: #aaa;
+}
+
+.limit-row b {
+  color: #d6b45a;
+}
+
+.primary-btn {
+  width:100%;
+  border:0;
+  padding:14px;
+  border-radius:11px;
+  background:linear-gradient(135deg,#ffe09a,#bd8422);
+  color:#080808;
+  font-weight:1000;
+  margin-top:14px;
+  cursor:pointer;
+}
+
 @media(max-width:800px) {
   .grid {
     grid-template-columns:1fr;
@@ -669,10 +792,15 @@ button {
       CARTOON AI
     </button>
 
-  </div>
+    <button
+      class="tab"
+      onclick="showPage('codePage',this)">
+      AI CODE BUILDER
+    </button>
+
+</div>
 
 </header>
-
 
 <!-- =========================
      FLYER STUDIO
@@ -835,7 +963,6 @@ button {
 
     </div>
 
-
     <div class="panel">
 
       <div class="preview-head">
@@ -931,7 +1058,6 @@ button {
   </div>
 
 </section>
-
 
 <!-- =========================
      CARTOON AI STUDIO
@@ -1146,7 +1272,6 @@ button {
 
     </div>
 
-
     <div class="panel">
 
       <div class="panel-title">
@@ -1202,6 +1327,306 @@ button {
 
 </section>
 
+<!-- =========================
+     AI CODE BUILDER
+========================= -->
+
+<section id="codePage" class="page">
+
+  <div class="hero">
+
+    <h2>Build With <span>ADAMI AI</span></h2>
+
+    <p>
+      Create websites, applications and software with
+      AI-assisted coding, testing, preview and download.
+    </p>
+
+  </div>
+
+  <!-- =========================
+       CODE BUILDER RULES
+  ========================= -->
+
+  <div class="panel">
+
+    <div class="panel-title">
+      🛡️ CODE BUILDER RULES
+    </div>
+
+    <div class="note">
+      ADAMI Code Builder is available to users under fair-use
+      limits. These limits help keep the service fast, secure
+      and available for everyone.
+    </div>
+
+    <div class="code-rules">
+
+      <div class="rule-card">
+        <div class="rule-icon">🏗️</div>
+
+        <div>
+          <strong>3 PROJECTS</strong>
+          <span>Maximum 3 active projects per user</span>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon">🤖</div>
+
+        <div>
+          <strong>5 AI BUILDS / DAY</strong>
+          <span>Maximum 5 AI build requests every day</span>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon">📁</div>
+
+        <div>
+          <strong>30 FILES / PROJECT</strong>
+          <span>Maximum 30 files in one project</span>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon">💻</div>
+
+        <div>
+          <strong>100 KB CODE</strong>
+          <span>Maximum generated code size per project</span>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon">▶️</div>
+
+        <div>
+          <strong>30 SECOND TEST</strong>
+          <span>Maximum test execution time per run</span>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon">💾</div>
+
+        <div>
+          <strong>50 MB STORAGE</strong>
+          <span>Maximum project storage per user</span>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon">📦</div>
+
+        <div>
+          <strong>ZIP DOWNLOAD</strong>
+          <span>Download your completed project as a ZIP</span>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon">👁️</div>
+
+        <div>
+          <strong>SAFE PREVIEW</strong>
+          <span>Preview projects inside an isolated environment</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- =========================
+       SECURITY RULES
+  ========================= -->
+
+  <div class="panel">
+
+    <div class="panel-title">
+      🔒 SECURITY RULES
+    </div>
+
+    <div class="security-list">
+
+      <div>
+        ✅ Users can only access their own projects.
+      </div>
+
+      <div>
+        ✅ User code must run inside an isolated sandbox.
+      </div>
+
+      <div>
+        ✅ User code cannot access ADAMI API keys or secrets.
+      </div>
+
+      <div>
+        ✅ User code cannot access another user's project.
+      </div>
+
+      <div>
+        ✅ Direct access to the ADAMI server is prohibited.
+      </div>
+
+      <div>
+        ✅ Dangerous server commands are blocked.
+      </div>
+
+      <div>
+        ✅ Malware, credential theft, attacks and abuse are prohibited.
+      </div>
+
+      <div>
+        ✅ Excessive usage can automatically trigger rate limits.
+      </div>
+
+      <div>
+        ✅ Projects violating the rules may be suspended.
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- =========================
+       START PROJECT
+  ========================= -->
+
+  <div class="panel">
+
+    <div class="panel-title">
+      🚀 START A PROJECT
+    </div>
+
+    <label class="field-label">
+      PROJECT NAME
+    </label>
+
+    <input
+      id="codeProjectName"
+      class="text-input"
+      type="text"
+      maxlength="80"
+      placeholder="My First Website"
+      autocomplete="off"
+    >
+
+    <label class="field-label">
+      WHAT DO YOU WANT TO BUILD?
+    </label>
+
+    <textarea
+      id="codeBuildPrompt"
+      class="text-input"
+      rows="6"
+      maxlength="5000"
+      placeholder="Example: Build a modern Nigerian business website with a homepage, about page, services page and contact page."
+    ></textarea>
+
+    <label class="field-label">
+      PROGRAMMING LANGUAGE
+    </label>
+
+    <select
+      id="codeLanguage"
+      class="text-input">
+
+      <option value="html">
+        HTML / CSS / JavaScript
+      </option>
+
+      <option value="python">
+        Python
+      </option>
+
+      <option value="javascript">
+        JavaScript
+      </option>
+
+      <option value="typescript">
+        TypeScript
+      </option>
+
+      <option value="react">
+        React
+      </option>
+
+      <option value="nextjs">
+        Next.js
+      </option>
+
+    </select>
+
+    <!-- CURRENT LIMITS -->
+
+    <div class="code-limit-box">
+
+      <strong>
+        STANDARD USER LIMITS
+      </strong>
+
+      <div class="limit-row">
+        <span>Active Projects</span>
+        <b>3</b>
+      </div>
+
+      <div class="limit-row">
+        <span>AI Builds / Day</span>
+        <b>5</b>
+      </div>
+
+      <div class="limit-row">
+        <span>Files / Project</span>
+        <b>30</b>
+      </div>
+
+      <div class="limit-row">
+        <span>Code Size</span>
+        <b>100 KB</b>
+      </div>
+
+      <div class="limit-row">
+        <span>Test Time</span>
+        <b>30 sec</b>
+      </div>
+
+      <div class="limit-row">
+        <span>Storage</span>
+        <b>50 MB</b>
+      </div>
+
+    </div>
+
+    <!-- BUILD BUTTON -->
+
+    <button
+      type="button"
+      class="primary-btn"
+      id="codeBuildButton"
+      disabled
+      style="opacity:.55;cursor:not-allowed;">
+
+      🤖 BUILD WITH ADAMI AI
+
+    </button>
+
+    <div class="note">
+
+      🔐 Your project will be protected by ADAMI's
+      server-side limits and isolated execution system.
+
+      <br><br>
+
+      AI Builder backend connection will be activated
+      in the next development step.
+
+    </div>
+
+  </div>
+
+</section>
 
 <script>
 
@@ -1225,7 +1650,6 @@ function showPage(pageId,button) {
 
   window.scrollTo({top:0,behavior:"smooth"});
 }
-
 
 /* =========================================
    FLYER PHOTO
@@ -1267,7 +1691,6 @@ document.getElementById("photoInput").addEventListener("change",async function()
   }
 
 });
-
 
 /* =========================================
    IMAGE COMPRESSION
@@ -1319,7 +1742,6 @@ function compressImage(file,maxSize,quality) {
 
 }
 
-
 /* =========================================
    FLYER DESIGN
 ========================================= */
@@ -1338,7 +1760,6 @@ function selectStyle(button,theme) {
 
 }
 
-
 function fieldValue(id,fallback) {
 
   const element = document.getElementById(id);
@@ -1346,7 +1767,6 @@ function fieldValue(id,fallback) {
   return element.value.trim() || fallback;
 
 }
-
 
 function updateFlyer() {
 
@@ -1380,7 +1800,6 @@ function updateFlyer() {
 
 }
 
-
 /* =========================================
    LIVE FLYER INPUTS
 ========================================= */
@@ -1398,7 +1817,6 @@ function updateFlyer() {
   document.getElementById(id).addEventListener("input",updateFlyer);
 
 });
-
 
 /* =========================================
    DOWNLOAD FLYER PNG
@@ -1445,7 +1863,6 @@ async function downloadFlyer() {
 
 }
 
-
 /* =========================================
    RESET FLYER
 ========================================= */
@@ -1477,7 +1894,6 @@ function resetFlyer() {
   updateFlyer();
 
 }
-
 
 /* =========================================
    CARTOON PHOTO
@@ -1520,7 +1936,6 @@ document.getElementById("cartoonPhoto").addEventListener("change",async function
   }
 
 });
-
 
 /* =========================================
    ADMIN UNLOCK
@@ -1586,7 +2001,6 @@ async function unlockAdmin() {
 
 }
 
-
 /* =========================================
    VIDEO DURATION
 ========================================= */
@@ -1610,7 +2024,6 @@ function selectDuration(seconds,button) {
   if(button) button.classList.add("active");
 
 }
-
 
 /* =========================================
    GENERATE REAL RUNWAY VIDEO
@@ -1723,7 +2136,6 @@ async function generateCartoon() {
 
 }
 
-
 /* =========================================
    DISPLAY GENERATED VIDEO
 ========================================= */
@@ -1741,7 +2153,6 @@ function showVideo(url) {
   document.getElementById("videoResult").style.display = "block";
 
 }
-
 
 /* =========================================
    DOWNLOAD GENERATED VIDEO
@@ -1775,7 +2186,6 @@ function downloadVideo() {
 
 }
 
-
 /* =========================================
    NEW VIDEO
 ========================================= */
@@ -1799,7 +2209,6 @@ function newVideo() {
   document.getElementById("status").style.display = "none";
 
 }
-
 
 /* =========================================
    INITIALIZE
