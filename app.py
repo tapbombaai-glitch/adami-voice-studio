@@ -24,10 +24,7 @@ from flask import (
 
 app = Flask(__name__)
 
-app.secret_key = os.environ.get(
-    "FLASK_SECRET_KEY",
-    "CHANGE_THIS_TO_A_LONG_RANDOM_SECRET"
-)
+app.secret_key = os.environ["FLASK_SECRET_KEY"]
 
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
@@ -99,6 +96,169 @@ except Exception as error:
     raise RuntimeError(
         "ADAMI cannot start because persistent storage is unavailable."
     ) from error
+
+# ==========================================
+# ADAMI PERMANENT DATABASE
+# ==========================================
+
+DATABASE_FILE = DATA_DIRECTORY / "adami.sqlite3"
+
+def get_db_connection():
+
+    connection = sqlite3.connect(
+        str(DATABASE_FILE),
+        timeout=30
+    )
+
+    connection.row_factory = sqlite3.Row
+
+    connection.execute("PRAGMA foreign_keys = ON")
+    connection.execute("PRAGMA busy_timeout = 30000")
+
+    return connection
+
+def initialize_database():
+
+    connection = get_db_connection()
+
+    try:
+
+        connection.execute(
+            "PRAGMA journal_mode = WAL"
+        )
+
+        connection.executescript("""
+
+        CREATE TABLE IF NOT EXISTS customers (
+
+            id TEXT PRIMARY KEY,
+
+            email TEXT NOT NULL UNIQUE,
+
+            full_name TEXT DEFAULT '',
+
+            fix_credits INTEGER NOT NULL DEFAULT 0,
+
+            account_status TEXT NOT NULL DEFAULT 'active',
+
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+
+        );
+
+        CREATE TABLE IF NOT EXISTS projects (
+
+            id TEXT PRIMARY KEY,
+
+            customer_id TEXT NOT NULL,
+
+            project_name TEXT NOT NULL,
+
+            programming_language TEXT NOT NULL,
+
+            project_files TEXT NOT NULL DEFAULT '[]',
+
+            project_summary TEXT DEFAULT '',
+
+            project_status TEXT NOT NULL DEFAULT 'saved',
+
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (customer_id)
+                REFERENCES customers(id)
+
+        );
+
+        CREATE TABLE IF NOT EXISTS payments (
+
+            id TEXT PRIMARY KEY,
+
+            customer_id TEXT NOT NULL,
+
+            project_id TEXT,
+
+            reference TEXT NOT NULL UNIQUE,
+
+            package_name TEXT NOT NULL,
+
+            amount_kobo INTEGER NOT NULL,
+
+            currency TEXT NOT NULL DEFAULT 'NGN',
+
+            fix_credits INTEGER NOT NULL DEFAULT 0,
+
+            payment_status TEXT NOT NULL DEFAULT 'pending',
+
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            verified_at TEXT,
+
+            FOREIGN KEY (customer_id)
+                REFERENCES customers(id),
+
+            FOREIGN KEY (project_id)
+                REFERENCES projects(id)
+
+        );
+
+        CREATE TABLE IF NOT EXISTS credit_transactions (
+
+            id TEXT PRIMARY KEY,
+
+            customer_id TEXT NOT NULL,
+
+            payment_id TEXT,
+
+            transaction_type TEXT NOT NULL,
+
+            credits_changed INTEGER NOT NULL,
+
+            balance_after INTEGER NOT NULL,
+
+            description TEXT DEFAULT '',
+
+            reference TEXT NOT NULL UNIQUE,
+
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (customer_id)
+                REFERENCES customers(id),
+
+            FOREIGN KEY (payment_id)
+                REFERENCES payments(id)
+
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_projects_customer
+        ON projects(customer_id);
+
+        CREATE INDEX IF NOT EXISTS idx_payments_customer
+        ON payments(customer_id);
+
+        CREATE INDEX IF NOT EXISTS idx_payments_status
+        ON payments(payment_status);
+
+        CREATE INDEX IF NOT EXISTS idx_credit_customer
+        ON credit_transactions(customer_id);
+
+        """)
+
+        connection.commit()
+
+        app.logger.info(
+            "ADAMI permanent database initialized successfully."
+        )
+
+    finally:
+
+        connection.close()
+
+# Initialize database when the application starts.
+
+initialize_database()
 
 USAGE_FILE = DATA_DIRECTORY / "adami_usage.json"
 
