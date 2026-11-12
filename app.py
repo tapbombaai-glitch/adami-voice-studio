@@ -61,7 +61,7 @@ RUNWAY_MODEL = os.environ.get(
 RUNWAY_BASE_URL = "https://api.dev.runwayml.com/v1"
 
 # ==========================================
-# PUBLIC GENERATION LIMIT
+# PUBLIC GENERATION LIMIT - LEAVE AS 3 DAYS - DO NOT CHANGE
 # ==========================================
 
 PUBLIC_VIDEO_SECONDS = 10
@@ -383,73 +383,49 @@ def validate_image(image_data):
     )
 
 # ==========================================
-# BUILD AI VIDEO PROMPT
+# BUILD AI VIDEO PROMPT - FIXED
 # ==========================================
 
 def build_prompt(data):
 
     style = str(
         data.get("style", "realistic human cartoon")
-    )[:200]
+    ).strip()[:150]
 
     script = str(
         data.get("script", "")
-    )[:2000]
+    ).strip()[:500]
 
     direction = str(
         data.get("direction", "")
-    )[:1500]
+    ).strip()[:250]
 
     emotion = str(
         data.get("emotion", "Natural")
-    )[:100]
+    ).strip()[:60]
 
     voice = str(
         data.get("voice", "main-naija-pidgin")
-    )[:100]
+    ).strip()[:60]
 
-    prompt = f"""
-Create a high-quality cinematic animated video
-using the uploaded image as the first frame.
+    prompt = (
+        "Create a cinematic Nigerian/African animated video "
+        "using the uploaded image as the first frame. "
+        f"Style: {style}. "
+        f"Story: {script}. "
+        f"Direction: {direction}. "
+        f"Emotion: {emotion}. "
+        f"Voice style: {voice}. "
+        "Preserve the person's identity, face, hairstyle, "
+        "skin tone and clothing. Use natural facial expressions, "
+        "blinking, body movement and believable gestures. "
+        "Use smooth cinematic camera movement. "
+        "Keep the character visually consistent throughout. "
+        "Avoid distorted faces, extra fingers and unnatural motion."
+    )
 
-CHARACTER STYLE:
-{style}
-
-CHARACTER DIRECTION:
-{direction}
-
-ACTION AND STORY:
-{script}
-
-EMOTION:
-{emotion}
-
-VOICE STYLE CONTEXT:
-{voice}
-
-IMPORTANT VISUAL INSTRUCTIONS:
-
-Preserve the identity and recognizable appearance
-of the person in the reference photograph.
-
-Keep the same face, skin tone, hairstyle and clothing
-as consistently as possible.
-
-Use natural body movement, realistic expressions,
-natural blinking, believable gestures and cinematic
-camera movement.
-
-The scene should feel like a professionally produced
-Nigerian or African short film.
-
-Avoid changing the character's identity.
-Avoid distorted faces, extra fingers and unnatural
-body movements.
-
-Generate visually coherent motion.
-"""
-
-    return prompt.strip()
+    # Runway allows a maximum of 1000 characters.
+    return prompt[:950]
 
 # ==========================================
 # CREATE RUNWAY VIDEO TASK
@@ -622,7 +598,7 @@ def admin_unlock():
     })
 
 # ==========================================
-# REAL AI GENERATION ENDPOINT
+# REAL AI GENERATION ENDPOINT - FIXED ADMIN 1-4 MINS
 # ==========================================
 
 @app.route(
@@ -651,10 +627,11 @@ def generate_cartoon():
 
     if is_admin:
 
-        if duration not in (60, 120):
+        # FIXED: Admin now 1,2,3,4 minutes = 60,120,180,240
+        if duration not in (60, 120, 180, 240):
 
             return jsonify({
-                "error": "Admin videos must be 60 or 120 seconds."
+                "error": "Admin videos must be 60, 120, 180 or 240 seconds (1, 2, 3 or 4 minutes)."
             }), 400
 
     else:
@@ -695,25 +672,30 @@ def generate_cartoon():
 
     try:
 
-        if duration != 10:
+        # FIXED: No more 501. Admin generates multiple 10s clips and returns them all.
+        # Public = 1 clip (10s). Admin 60s = 6 clips, 120s = 12 clips, 180s = 18 clips, 240s = 24 clips.
+        if is_admin:
+            num_clips = duration // 10
+        else:
+            num_clips = 1
 
-            return jsonify({
-                "error": (
-                    "The 60/120-second multi-clip assembly "
-                    "is not yet connected. This endpoint currently "
-                    "generates a single 10-second Runway clip."
-                )
-            }), 501
+        video_urls = []
+        task_ids = []
 
-        task_id = create_runway_task(
-            image_uri,
-            prompt,
-            10
-        )
+        for clip_index in range(num_clips):
+            # For clip 2+, add continuation note so story continues, still under 950 chars
+            clip_prompt = prompt
+            if clip_index > 0:
+                clip_prompt = (prompt + f" Continue the story, part {clip_index + 1} of {num_clips}.")[:950]
 
-        video_url = wait_for_runway_video(
-            task_id
-        )
+            task_id = create_runway_task(
+                image_uri,
+                clip_prompt,
+                10
+            )
+            task_ids.append(task_id)
+            video_url = wait_for_runway_video(task_id)
+            video_urls.append(video_url)
 
         if not is_admin:
 
@@ -723,17 +705,23 @@ def generate_cartoon():
 
             "success": True,
 
-            "videoUrl": video_url,
+            "videoUrl": video_urls[0] if video_urls else None,
 
-            "video_url": video_url,
+            "video_url": video_urls[0] if video_urls else None,
 
-            "taskId": task_id,
+            # New: full list for Admin 1-4 mins, frontend can play one after another
+            "videoUrls": video_urls,
+            "video_urls": video_urls,
 
-            "duration": 10,
+            "taskId": task_ids[0] if task_ids else None,
+            "taskIds": task_ids,
+
+            "duration": duration,
+            "clips": num_clips,
 
             "model": RUNWAY_MODEL,
 
-            "message": "Your AI video is ready."
+            "message": f"Your AI video is ready. {num_clips} clip(s) generated."
 
         }), 200
 
