@@ -5,6 +5,8 @@ import time
 import base64
 import logging
 import threading
+import uuid
+import sqlite3
 from pathlib import Path
 
 import requests
@@ -42,6 +44,14 @@ logging.basicConfig(level=logging.INFO)
 
 RUNWAY_API_KEY = os.environ.get("RUNWAY_API_KEY", "")
 
+# ADAMI AI CODE BUILDER
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+
+OPENAI_MODEL = os.environ.get(
+    "OPENAI_MODEL",
+    "gpt-4o-mini"
+)
+
 ADMIN_TOKEN = os.environ.get("ADAMI_ADMIN_TOKEN", "")
 
 RUNWAY_VERSION = "2024-11-06"
@@ -61,20 +71,38 @@ PUBLIC_VIDEO_SECONDS = 10
 
 PUBLIC_COOLDOWN_SECONDS = 3 * 24 * 60 * 60
 
-# Use persistent storage at /data when available.
+# ==========================================
+# ADAMI PERMANENT STORAGE
+# ==========================================
+
 DATA_DIRECTORY = Path(
     os.environ.get("ADAMI_DATA_DIR", "/data")
 )
 
 try:
     DATA_DIRECTORY.mkdir(parents=True, exist_ok=True)
-except Exception:
-    DATA_DIRECTORY = Path(".")
+
+    test_file = DATA_DIRECTORY / ".adami_storage_test"
+
+    test_file.write_text("storage_ok", encoding="utf-8")
+    test_file.unlink()
+
+    logging.info("ADAMI persistent storage is ready.")
+
+except Exception as error:
+
+    logging.critical(
+        "ADAMI persistent storage is unavailable: %s",
+        error
+    )
+
+    raise RuntimeError(
+        "ADAMI cannot start because persistent storage is unavailable."
+    ) from error
 
 USAGE_FILE = DATA_DIRECTORY / "adami_usage.json"
 
 usage_lock = threading.Lock()
-
 
 def load_usage():
 
@@ -87,7 +115,6 @@ def load_usage():
 
     return {}
 
-
 def save_usage(data):
 
     temporary_file = USAGE_FILE.with_suffix(".tmp")
@@ -97,14 +124,9 @@ def save_usage(data):
 
     temporary_file.replace(USAGE_FILE)
 
-
 def get_user_identifier():
 
-    # This is an IP-based public limit.
-    # Configure trusted proxy handling carefully in production.
-
     return request.remote_addr or "unknown"
-
 
 def check_public_limit():
 
@@ -129,7 +151,6 @@ def check_public_limit():
 
         return True, 0
 
-
 def record_public_generation():
 
     identifier = get_user_identifier()
@@ -142,7 +163,6 @@ def record_public_generation():
 
         save_usage(usage)
 
-
 # ==========================================
 # RUNWAY HEADERS
 # ==========================================
@@ -154,7 +174,6 @@ def runway_headers():
         "Content-Type": "application/json",
         "X-Runway-Version": RUNWAY_VERSION
     }
-
 
 # ==========================================
 # IMAGE VALIDATION
@@ -196,14 +215,12 @@ def validate_image(image_data):
     if len(decoded) < 100:
         raise ValueError("The uploaded photo is too small.")
 
-    # Use the correct image MIME type.
     if image_format == "jpg":
         image_format = "jpeg"
 
     return (
         f"data:image/{image_format};base64,{encoded_data}"
     )
-
 
 # ==========================================
 # BUILD AI VIDEO PROMPT
@@ -274,7 +291,6 @@ Generate visually coherent motion.
 
     return prompt.strip()
 
-
 # ==========================================
 # CREATE RUNWAY VIDEO TASK
 # ==========================================
@@ -323,7 +339,6 @@ def create_runway_task(image_uri, prompt, duration):
         )
 
     return task_id
-
 
 # ==========================================
 # CHECK RUNWAY TASK
@@ -390,7 +405,6 @@ def wait_for_runway_video(task_id):
         "Please try again."
     )
 
-
 # ==========================================
 # HOMEPAGE
 # ==========================================
@@ -402,7 +416,6 @@ def home():
         ".",
         "index.html"
     )
-
 
 # ==========================================
 # ADMIN UNLOCK
@@ -448,7 +461,6 @@ def admin_unlock():
         "message": "Admin access granted."
     })
 
-
 # ==========================================
 # REAL AI GENERATION ENDPOINT
 # ==========================================
@@ -466,10 +478,6 @@ def generate_cartoon():
         }), 503
 
     data = request.get_json(silent=True) or {}
-
-    # --------------------------------------
-    # Duration and admin authorization
-    # --------------------------------------
 
     try:
         duration = int(data.get("duration", 10))
@@ -511,10 +519,6 @@ def generate_cartoon():
                 "remaining_seconds": remaining
             }), 429
 
-    # --------------------------------------
-    # Validate uploaded image
-    # --------------------------------------
-
     try:
 
         image_uri = validate_image(
@@ -527,23 +531,9 @@ def generate_cartoon():
             "error": str(error)
         }), 400
 
-    # --------------------------------------
-    # Build prompt
-    # --------------------------------------
-
     prompt = build_prompt(data)
 
-    # --------------------------------------
-    # Generate video
-    # --------------------------------------
-
     try:
-
-        # Runway image-to-video supports
-        # individual clips between 2 and 10 seconds.
-        #
-        # 60/120-second multi-clip assembly
-        # requires a separate stitching workflow.
 
         if duration != 10:
 
@@ -565,8 +555,6 @@ def generate_cartoon():
             task_id
         )
 
-        # Only consume the public allowance
-        # after a successful video generation.
         if not is_admin:
 
             record_public_generation()
@@ -609,7 +597,6 @@ def generate_cartoon():
             "error": str(error)
         }), 500
 
-
 # ==========================================
 # KEEP OLD API ROUTE WORKING
 # ==========================================
@@ -622,9 +609,6 @@ def generate():
 
     data = request.get_json(silent=True) or {}
 
-    # Preserve the old route.
-    # It now uses the same real video generator.
-
     if not data.get("image"):
 
         return jsonify({
@@ -636,6 +620,423 @@ def generate():
 
     return generate_cartoon()
 
+# ==========================================
+# ADAMI AI CODE BUILDER
+# ==========================================
+
+CODE_USAGE_FILE = DATA_DIRECTORY / "adami_code_usage.json"
+code_usage_lock = threading.Lock()
+
+CODE_MAX_BUILDS_PER_DAY = 5
+CODE_MAX_FILES = 30
+CODE_MAX_PROJECT_SIZE = 100 * 1024
+
+# ==========================================
+# OFFICIAL ADAMI CODE BUILDER PRICING
+# ==========================================
+
+CODE_BUILDER_PRICING = {
+    "starter": {
+        "price": 2000,
+        "included_fixes": 2
+    },
+    "business": {
+        "price": 5000,
+        "included_fixes": 5
+    },
+    "professional": {
+        "price": 10000,
+        "included_fixes": 10
+    },
+    "enterprise": {
+        "price": 25000,
+        "included_fixes": 20
+    }
+}
+
+CODE_FIX_PRICING = {
+    "small": 500,
+    "medium": 1000,
+    "major": 2000
+}
+
+CODE_FIX_PACKAGES = {
+    "fix_3": {
+        "price": 1500,
+        "credits": 3
+    },
+    "fix_5": {
+        "price": 2500,
+        "credits": 5
+    }
+}
+
+def load_code_usage():
+
+    try:
+        if CODE_USAGE_FILE.exists():
+            with open(CODE_USAGE_FILE, "r") as file:
+                return json.load(file)
+    except Exception:
+        app.logger.exception("Could not read Code Builder usage")
+
+    return {}
+
+def save_code_usage(data):
+
+    temporary_file = CODE_USAGE_FILE.with_suffix(".tmp")
+
+    with open(temporary_file, "w") as file:
+        json.dump(data, file)
+
+    temporary_file.replace(CODE_USAGE_FILE)
+
+@app.route("/api/code-builder/build", methods=["POST"])
+def code_builder_build():
+
+    if not OPENAI_API_KEY:
+
+        return jsonify({
+            "success": False,
+            "error": "AI Code Builder is not configured yet. Please contact the administrator."
+        }), 503
+
+    data = request.get_json(silent=True) or {}
+
+    project_name = str(
+        data.get("projectName", "My ADAMI Project")
+    ).strip()[:80]
+
+    prompt = str(
+        data.get("prompt", "")
+    ).strip()
+
+    language = str(
+        data.get("language", "html")
+    ).lower()
+
+    allowed_languages = (
+        "html",
+        "python",
+        "javascript",
+        "typescript",
+        "react",
+        "nextjs"
+    )
+
+    if language not in allowed_languages:
+
+        return jsonify({
+            "success": False,
+            "error": "Unsupported programming language."
+        }), 400
+
+    if len(prompt) < 10:
+
+        return jsonify({
+            "success": False,
+            "error": "Please describe what you want to build."
+        }), 400
+
+    if len(prompt) > 5000:
+
+        return jsonify({
+            "success": False,
+            "error": "Your project description is too long."
+        }), 400
+
+    # --------------------------------------
+    # DAILY BUILD LIMIT
+    # --------------------------------------
+
+    identifier = get_user_identifier()
+    today = time.strftime("%Y-%m-%d")
+
+    with code_usage_lock:
+
+        usage = load_code_usage()
+
+        user_usage = usage.get(identifier, {})
+
+        if user_usage.get("date") != today:
+
+            user_usage = {
+                "date": today,
+                "count": 0
+            }
+
+        if int(user_usage.get("count", 0)) >= CODE_MAX_BUILDS_PER_DAY:
+
+            return jsonify({
+                "success": False,
+                "error": "You have reached your limit of 5 AI builds today. Please try again tomorrow."
+            }), 429
+
+    # --------------------------------------
+    # AI PROJECT GENERATION
+    # --------------------------------------
+
+    instructions = """
+You are ADAMI AI Code Builder, a professional software engineer.
+
+Build complete, useful software projects based on the user's request.
+
+Return JSON containing:
+- summary: a short explanation of the project
+- files: an array of files
+- each file must contain path and content
+
+RULES:
+
+1. Generate working source code, not explanations instead of code.
+2. Include all essential files.
+3. Use clean, organized project folders.
+4. Never include API keys, passwords or private secrets.
+5. Never create malware, credential theft tools or harmful software.
+6. Never create code intended to attack other systems.
+7. Do not include absolute file paths.
+8. Keep files relevant to the requested project.
+9. Do not claim that code has been tested or executed.
+10. Return valid JSON matching the required structure.
+"""
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "summary": {
+                "type": "string"
+            },
+            "files": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "path": {
+                            "type": "string"
+                        },
+                        "content": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["path", "content"],
+                    "additionalProperties": False
+                }
+            }
+        },
+        "required": ["summary", "files"],
+        "additionalProperties": False
+    }
+
+    payload = {
+        "model": OPENAI_MODEL,
+        "instructions": instructions,
+        "input": (
+            "Project name: " + project_name +
+            "\nProgramming language: " + language +
+            "\nUser requirements: " + prompt
+        ),
+        "text": {
+            "format": {
+                "type": "json_schema",
+                "name": "adami_project",
+                "strict": True,
+                "schema": schema
+            }
+        },
+        "max_output_tokens": 12000
+    }
+
+    try:
+
+        response = requests.post(
+            "https://api.openai.com/v1/responses",
+            headers={
+                "Authorization": f"Bearer {OPENAI_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json=payload,
+            timeout=120
+        )
+
+        if response.status_code != 200:
+
+            app.logger.error(
+                "OpenAI Code Builder error: %s",
+                response.text[:1000]
+            )
+
+            return jsonify({
+                "success": False,
+                "error": "The AI builder could not complete your request. Please try again."
+            }), 502
+
+        result = response.json()
+
+        output_text = ""
+
+        for output_item in result.get("output", []):
+
+            if output_item.get("type") == "message":
+
+                for content_item in output_item.get("content", []):
+
+                    if content_item.get("type") == "output_text":
+
+                        output_text += content_item.get("text", "")
+
+        if not output_text:
+
+            app.logger.error(
+                "OpenAI returned no output text."
+            )
+
+            return jsonify({
+                "success": False,
+                "error": "The AI returned an empty project. Please try again."
+            }), 502
+
+        project = json.loads(output_text)
+
+        files = project.get("files", [])
+
+        if not isinstance(files, list) or not files:
+
+            return jsonify({
+                "success": False,
+                "error": "The AI did not generate any project files."
+            }), 502
+
+        if len(files) > CODE_MAX_FILES:
+
+            return jsonify({
+                "success": False,
+                "error": "The generated project exceeds the 30-file limit."
+            }), 400
+
+        # ----------------------------------
+        # VALIDATE GENERATED FILES
+        # ----------------------------------
+
+        safe_files = []
+        total_size = 0
+        used_paths = set()
+
+        for item in files:
+
+            if not isinstance(item, dict):
+                continue
+
+            path = str(item.get("path", "")).replace("\\", "/").strip()
+            content = item.get("content", "")
+
+            if not isinstance(content, str):
+                continue
+
+            if (
+                not path
+                or path.startswith("/")
+                or ".." in path.split("/")
+                or ":" in path
+                or "\x00" in path
+            ):
+                continue
+
+            if len(path) > 180:
+                continue
+
+            if path in used_paths:
+                continue
+
+            used_paths.add(path)
+
+            file_size = len(content.encode("utf-8"))
+            total_size += file_size
+
+            if total_size > CODE_MAX_PROJECT_SIZE:
+
+                return jsonify({
+                    "success": False,
+                    "error": "The generated project exceeds the 100 KB code limit."
+                }), 400
+
+            safe_files.append({
+                "path": path,
+                "content": content
+            })
+
+        if not safe_files:
+
+            return jsonify({
+                "success": False,
+                "error": "No valid project files were generated."
+            }), 502
+
+        # ----------------------------------
+        # SAVE DAILY USAGE AFTER SUCCESS
+        # ----------------------------------
+
+        with code_usage_lock:
+
+            usage = load_code_usage()
+
+            user_usage = usage.get(identifier, {})
+
+            if user_usage.get("date") != today:
+
+                user_usage = {
+                    "date": today,
+                    "count": 0
+                }
+
+            user_usage["count"] = int(
+                user_usage.get("count", 0)
+            ) + 1
+
+            usage[identifier] = user_usage
+
+            save_code_usage(usage)
+
+        return jsonify({
+
+            "success": True,
+
+            "projectName": project_name,
+
+            "summary": str(
+                project.get("summary", "")
+            )[:2000],
+
+            "files": safe_files,
+
+            "fileCount": len(safe_files),
+
+            "remainingBuilds": max(
+                0,
+                CODE_MAX_BUILDS_PER_DAY -
+                int(user_usage["count"])
+            ),
+
+            "message": "Your project files have been generated successfully."
+
+        }), 200
+
+    except requests.Timeout:
+
+        return jsonify({
+            "success": False,
+            "error": "The AI took too long to respond. Please try again."
+        }), 504
+
+    except Exception:
+
+        app.logger.exception(
+            "ADAMI Code Builder failed"
+        )
+
+        return jsonify({
+            "success": False,
+            "error": "Something went wrong while building your project."
+        }), 500
 
 # ==========================================
 # HEALTH CHECK
@@ -657,7 +1058,6 @@ def health():
         "generation_endpoint": "/api/cartoon/generate"
 
     })
-
 
 # ==========================================
 # START SERVER
