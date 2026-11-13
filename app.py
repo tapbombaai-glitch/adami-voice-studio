@@ -9,6 +9,7 @@ import uuid
 import sqlite3
 import subprocess
 import tempfile
+import shutil
 from pathlib import Path
 from io import BytesIO
 
@@ -338,7 +339,7 @@ def wait_for_runway_video(task_id):
     raise RuntimeError("Video generation is taking too long. Please try again.")
 
 # ==========================================
-# FFMPEG + ELEVENLABS - SINGLE MP4
+# FFMPEG + ELEVENLABS - SINGLE MP4 - FIXED
 # ==========================================
 
 def get_ffmpeg_path():
@@ -357,11 +358,26 @@ def download_file(url, dest_path):
                 f.write(chunk)
     return dest_path
 
+def get_media_duration(path):
+    ffprobe = shutil.which("ffprobe")
+    if not ffprobe:
+        ffprobe = str(Path(get_ffmpeg_path()).parent / "ffprobe")
+    result = subprocess.run(
+        [ffprobe, "-v", "error", "-show_entries", "format=duration",
+         "-of", "default=noprint_wrappers=1:nokey=1", str(path)],
+        capture_output=True, text=True, timeout=30
+    )
+    try:
+        return float(result.stdout.strip())
+    except Exception:
+        return 0.0
+
 def generate_naija_voice(script_text, output_mp3_path):
     if not ELEVENLABS_API_KEY or not ELEVENLABS_VOICE_ID:
-        app.logger.warning("ElevenLabs not configured, skipping voice")
+        app.logger.warning("ElevenLabs not configured (missing API key or voice ID) — skipping voice")
         return None
-    if not script_text.strip():
+    if not script_text or not script_text.strip():
+        app.logger.warning("Empty script — skipping voice generation")
         return None
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{ELEVENLABS_VOICE_ID}"
     headers = {
@@ -372,15 +388,28 @@ def generate_naija_voice(script_text, output_mp3_path):
     payload = {
         "text": script_text[:4000],
         "model_id": ELEVENLABS_MODEL,
-        "voice_settings": {"stability": 0.5, "similarity_boost": 0.75, "style": 0.3, "use_speaker_boost": True}
+        "voice_settings": {
+            "stability": 0.45,
+            "similarity_boost": 0.80,
+            "style": 0.35,
+            "use_speaker_boost": True
+        }
     }
-    r = requests.post(url, headers=headers, json=payload, timeout=120)
-    if r.status_code != 200:
-        app.logger.error("ElevenLabs failed: %s", r.text[:500])
+    try:
+        r = requests.post(url, headers=headers, json=payload, timeout=120)
+        if r.status_code != 200:
+            app.logger.error("ElevenLabs failed (%s): %s", r.status_code, r.text[:800])
+            return None
+        with open(output_mp3_path, "wb") as f:
+            f.write(r.content)
+        if Path(output_mp3_path).stat().st_size < 1000:
+            app.logger.error("ElevenLabs returned almost empty audio file")
+            return None
+        app.logger.info("ElevenLabs voice generated successfully → %s", output_mp3_path)
+        return output_mp3_path
+    except Exception:
+        app.logger.exception("ElevenLabs request failed")
         return None
-    with open(output_mp3_path, "wb") as f:
-        f.write(r.content)
-    return output_mp3_path
 
 def concat_and_add_voice(video_urls, script_text, final_output_path, target_duration):
     ffmpeg = get_ffmpeg_path()
@@ -394,32 +423,57 @@ def concat_and_add_voice(video_urls, script_text, final_output_path, target_dura
         concat_file = tmpdir / "concat.txt"
         with open(concat_file, "w") as f:
             for p in clip_paths:
-                f.write(f"file '{p}'\n")
+                f.write(f"file '{p.as_posix()}'\n")
         joined_path = tmpdir / "joined.mp4"
         cmd_concat = [ffmpeg, "-y", "-f", "concat", "-safe", "0", "-i", str(concat_file), "-c", "copy", str(joined_path)]
         subprocess.run(cmd_concat, check=True, capture_output=True, timeout=300)
+        video_duration = get_media_duration(joined_path)
+        app.logger.info("Joined video duration: %.2fs (target was %ss)", video_duration, target_duration)
         voice_mp3 = tmpdir / "voice.mp3"
         voice_path = generate_naija_voice(script_text, voice_mp3)
         if not voice_path or not Path(voice_path).exists():
-            subprocess.run([ffmpeg, "-y", "-i", str(joined_path), "-c", "copy", str(final_output_path)], check=True, capture_output=True, timeout=300)
+            app.logger.warning("No voice available — returning silent video")
+            subprocess.run([ffmpeg, "-y", "-i", str(joined_path), "-c", "copy", str(final_output_path)], check=True, capture_output=True, timeout=120)
             return str(final_output_path)
+        voice_duration = get_media_duration(voice_path)
+        app.logger.info("Voice duration: %.2fs", voice_duration)
         cmd_final = [
             ffmpeg, "-y",
             "-i", str(joined_path),
             "-i", str(voice_path),
-            "-map", "0:v:0", "-map", "1:a:0",
-            "-c:v", "libx264", "-c:a", "aac",
+            "-filter_complex",
+            f"[1:a]apad=pad_dur={max(0, video_duration - voice_duration)},atrim=0:{video_duration},volume=1.6[a]",
+            "-map", "0:v:0",
+            "-map", "[a]",
+            "-c:v", "copy",
+            "-c:a", "aac",
+            "-b:a", "192k",
             "-shortest",
+            "-movflags", "+faststart",
             str(final_output_path)
         ]
-        subprocess.run(cmd_final, check=True, capture_output=True, timeout=300)
+        result = subprocess.run(cmd_final, capture_output=True, text=True, timeout=300)
+        if result.returncode != 0:
+            app.logger.error("ffmpeg mux failed:\n%s", result.stderr[-1500:])
+            cmd_fallback = [
+                ffmpeg, "-y",
+                "-i", str(joined_path),
+                "-i", str(voice_path),
+                "-map", "0:v:0", "-map", "1:a:0",
+                "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+                "-c:a", "aac", "-b:a", "192k",
+                "-shortest", "-movflags", "+faststart",
+                str(final_output_path)
+            ]
+            subprocess.run(cmd_fallback, check=True, capture_output=True, timeout=300)
+        probe = subprocess.run([ffmpeg, "-i", str(final_output_path), "-f", "null", "-"], capture_output=True, text=True, timeout=30)
+        if "Audio:" not in probe.stderr:
+            app.logger.error("Final MP4 has NO audio stream!")
+            raise RuntimeError("Voice was generated but failed to mux into the final video")
+        app.logger.info("Final single MP4 with voice ready: %s", final_output_path)
         return str(final_output_path)
     finally:
-        try:
-            import shutil
-            shutil.rmtree(tmpdir, ignore_errors=True)
-        except Exception:
-            pass
+        shutil.rmtree(tmpdir, ignore_errors=True)
 
 # ==========================================
 # HOMEPAGE
@@ -447,7 +501,25 @@ def admin_unlock():
     return jsonify({"ok": True, "message": "Admin access granted."})
 
 # ==========================================
-# REAL AI GENERATION - SINGLE MP4 FOR ADMIN
+# TEST VOICE ENDPOINT
+# ==========================================
+
+@app.route("/api/cartoon/test-voice", methods=["POST"])
+def test_voice():
+    data = request.get_json(force=True) or {}
+    script = data.get("script") or "My people, una don hear? Amara don come back."
+    tmpdir = Path(tempfile.mkdtemp())
+    try:
+        voice_path = tmpdir / "test.mp3"
+        result = generate_naija_voice(script, voice_path)
+        if not result:
+            return {"ok": False, "stage": "elevenlabs_failed", "fix": "Check ELEVENLABS_API_KEY / ELEVENLABS_VOICE_ID in Render"}, 500
+        return {"ok": True, "duration": round(get_media_duration(result), 2), "size": Path(result).stat().st_size, "message": "Voice works"}
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+# ==========================================
+# REAL AI GENERATION - SINGLE MP4 FOR ADMIN + PUBLIC WITH VOICE
 # ==========================================
 
 @app.route("/api/cartoon/generate", methods=["POST"])
@@ -492,11 +564,20 @@ def generate_cartoon():
             video_url = wait_for_runway_video(task_id)
             video_urls.append(video_url)
         if not is_admin:
+            final_filename = f"adami_public_{int(time.time())}_{uuid.uuid4().hex[:8]}.mp4"
+            final_path = DATA_DIRECTORY / final_filename
+            try:
+                concat_and_add_voice(video_urls, script_text, final_path, duration)
+                download_url = f"/api/cartoon/download/{final_filename}"
+            except Exception:
+                app.logger.exception("Public voice mux failed, falling back to raw")
+                download_url = video_urls[0]
             record_public_generation()
             return jsonify({
                 "success": True,
-                "videoUrl": video_urls[0],
-                "video_url": video_urls[0],
+                "videoUrl": download_url,
+                "video_url": download_url,
+                "downloadUrl": download_url,
                 "videoUrls": video_urls,
                 "video_urls": video_urls,
                 "taskId": task_ids[0] if task_ids else None,
@@ -504,7 +585,7 @@ def generate_cartoon():
                 "duration": duration,
                 "clips": num_clips,
                 "model": RUNWAY_MODEL,
-                "is_single_mp4": False,
+                "is_single_mp4": True,
                 "message": "Your AI video is ready. 1 clip generated."
             }), 200
         final_filename = f"adami_admin_{int(time.time())}_{uuid.uuid4().hex[:8]}.mp4"
