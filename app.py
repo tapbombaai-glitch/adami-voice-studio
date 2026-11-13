@@ -64,7 +64,9 @@ ELEVENLABS_MODEL = os.environ.get("ELEVENLABS_MODEL", "eleven_multilingual_v2")
 # PUBLIC GENERATION LIMIT - LEAVE AS 3 DAYS - DO NOT CHANGE
 # ==========================================
 
-PUBLIC_VIDEO_SECONDS = 10
+# UPGRADED: Public now 10, 20, 30 seconds
+PUBLIC_VIDEO_SECONDS = 30
+PUBLIC_ALLOWED_DURATIONS = (10, 20, 30)
 PUBLIC_COOLDOWN_SECONDS = 3 * 24 * 60 * 60
 
 # ==========================================
@@ -437,8 +439,6 @@ def concat_and_add_voice(video_urls, script_text, final_output_path, target_dura
             return str(final_output_path)
         voice_duration = get_media_duration(voice_path)
         app.logger.info("Voice duration: %.2fs", voice_duration)
-
-        # FIXED: Voice LOUD + Normalized + 0.4s delay for better lip look
         cmd_final = [
             ffmpeg, "-y",
             "-i", str(joined_path),
@@ -528,8 +528,9 @@ def generate_cartoon():
         if duration not in (60, 120, 180, 240):
             return jsonify({"error": "Admin videos must be 60, 120, 180 or 240 seconds (1, 2, 3 or 4 minutes)."}), 400
     else:
-        if duration != PUBLIC_VIDEO_SECONDS:
-            return jsonify({"error": "Public videos are limited to 10 seconds."}), 403
+        # UPGRADED: Public can now do 10, 20, 30
+        if duration not in PUBLIC_ALLOWED_DURATIONS:
+            return jsonify({"error": "Public videos are limited to 10, 20 or 30 seconds."}), 403
         allowed, remaining = check_public_limit()
         if not allowed:
             hours = remaining // 3600
@@ -541,10 +542,8 @@ def generate_cartoon():
     prompt = build_prompt(data)
     script_text = str(data.get("script", "")).strip()
     try:
-        if is_admin:
-            num_clips = duration // 10
-        else:
-            num_clips = 1
+        # UPGRADED: Public 30s = 3 clips of 10s joined, Admin = duration // 10
+        num_clips = duration // 10
         video_urls = []
         task_ids = []
         for clip_index in range(num_clips):
@@ -578,7 +577,7 @@ def generate_cartoon():
                 "clips": num_clips,
                 "model": RUNWAY_MODEL,
                 "is_single_mp4": True,
-                "message": "Your AI video is ready. 1 clip generated."
+                "message": f"Your AI video is ready. {num_clips} clip(s) generated."
             }), 200
         final_filename = f"adami_admin_{int(time.time())}_{uuid.uuid4().hex[:8]}.mp4"
         final_path = DATA_DIRECTORY / final_filename
