@@ -339,7 +339,7 @@ def wait_for_runway_video(task_id):
     raise RuntimeError("Video generation is taking too long. Please try again.")
 
 # ==========================================
-# FFMPEG + ELEVENLABS - SINGLE MP4 - FIXED
+# FFMPEG + ELEVENLABS - SINGLE MP4 - FIXED LOUD VOICE
 # ==========================================
 
 def get_ffmpeg_path():
@@ -437,15 +437,17 @@ def concat_and_add_voice(video_urls, script_text, final_output_path, target_dura
             return str(final_output_path)
         voice_duration = get_media_duration(voice_path)
         app.logger.info("Voice duration: %.2fs", voice_duration)
+
+        # FIXED: Voice LOUD + Normalized + 0.4s delay for better lip look
         cmd_final = [
             ffmpeg, "-y",
             "-i", str(joined_path),
             "-i", str(voice_path),
             "-filter_complex",
-            f"[1:a]apad=pad_dur={max(0, video_duration - voice_duration)},atrim=0:{video_duration},volume=1.6[a]",
+            f"[1:a]adelay=400|400,apad=pad_dur={max(0, video_duration - voice_duration + 0.4)},atrim=0:{video_duration},volume=3.0,loudnorm=I=-14:TP=-1:LRA=11[a]",
             "-map", "0:v:0",
             "-map", "[a]",
-            "-c:v", "copy",
+            "-c:v", "libx264", "-preset", "fast", "-crf", "23",
             "-c:a", "aac",
             "-b:a", "192k",
             "-shortest",
@@ -455,22 +457,12 @@ def concat_and_add_voice(video_urls, script_text, final_output_path, target_dura
         result = subprocess.run(cmd_final, capture_output=True, text=True, timeout=300)
         if result.returncode != 0:
             app.logger.error("ffmpeg mux failed:\n%s", result.stderr[-1500:])
-            cmd_fallback = [
-                ffmpeg, "-y",
-                "-i", str(joined_path),
-                "-i", str(voice_path),
-                "-map", "0:v:0", "-map", "1:a:0",
-                "-c:v", "libx264", "-preset", "fast", "-crf", "23",
-                "-c:a", "aac", "-b:a", "192k",
-                "-shortest", "-movflags", "+faststart",
-                str(final_output_path)
-            ]
-            subprocess.run(cmd_fallback, check=True, capture_output=True, timeout=300)
+            raise RuntimeError("ffmpeg voice mux failed")
         probe = subprocess.run([ffmpeg, "-i", str(final_output_path), "-f", "null", "-"], capture_output=True, text=True, timeout=30)
         if "Audio:" not in probe.stderr:
             app.logger.error("Final MP4 has NO audio stream!")
             raise RuntimeError("Voice was generated but failed to mux into the final video")
-        app.logger.info("Final single MP4 with voice ready: %s", final_output_path)
+        app.logger.info("Final single MP4 with LOUD voice ready: %s", final_output_path)
         return str(final_output_path)
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
