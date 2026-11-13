@@ -5,2218 +5,276 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#080808">
 <title>ADAMI — Premium Flyer & AI Studio</title>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
 <style>
-:root {
-  --bg:#070707;
-  --panel:#111;
-  --panel2:#181818;
-  --gold:#d7a642;
-  --gold-light:#ffe09a;
-  --white:#fff;
-  --muted:#999;
-  --green:#24d77a;
-  --border:#303030;
-}
-
-* {
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
-body {
-  background:
-    radial-gradient(circle at top,#30220d 0,#101010 35%,#050505 85%);
-  color:white;
-  font-family:Arial,Helvetica,sans-serif;
-  min-height:100vh;
-}
-
-button,input,textarea,select {
-  font:inherit;
-}
-
-button {
-  cursor:pointer;
-}
-
-.topbar {
-  position:sticky;
-  top:0;
-  z-index:100;
-  background:rgba(5,5,5,.96);
-  backdrop-filter:blur(15px);
-  border-bottom:1px solid rgba(215,166,66,.3);
-  padding:12px;
-}
-
-.top-inner {
-  max-width:1150px;
-  margin:auto;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-}
-
-.brand {
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.logo {
-  width:43px;
-  height:43px;
-  border-radius:13px;
-  display:grid;
-  place-items:center;
-  background:linear-gradient(135deg,#ffe39b,#a66a0e);
-  color:#090909;
-  font-size:25px;
-  font-weight:1000;
-}
-
-.brand h1 {
-  font-size:15px;
-  letter-spacing:2px;
-}
-
-.brand small {
-  display:block;
-  color:#999;
-  font-size:9px;
-  margin-top:4px;
-  letter-spacing:1px;
-}
-
-.online {
-  color:#8af3b5;
-  border:1px solid #246b42;
-  background:#0d2417;
-  padding:8px 11px;
-  border-radius:30px;
-  font-size:10px;
-  white-space:nowrap;
-}
-
-.tabs {
-  max-width:1150px;
-  margin:13px auto 0;
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  background:#111;
-  padding:5px;
-  border-radius:12px;
-  border:1px solid #292929;
-}
-
-.tab {
-  border:0;
-  background:transparent;
-  color:#999;
-  padding:12px;
-  border-radius:9px;
-  font-weight:900;
-}
-
-.tab.active {
-  background:linear-gradient(135deg,#ffe09a,#bd8422);
-  color:#080808;
-}
-
-.page {
-  display:none;
-  max-width:1150px;
-  margin:auto;
-  padding:20px 12px 70px;
-}
-
-.page.active {
-  display:block;
-}
-
-.hero {
-  text-align:center;
-  padding:15px 5px 23px;
-}
-
-.hero h2 {
-  font-size:29px;
-  margin-bottom:9px;
-}
-
-.hero h2 span {
-  color:var(--gold-light);
-}
-
-.hero p {
-  color:#aaa;
-  font-size:13px;
-  line-height:1.6;
-  max-width:650px;
-  margin:auto;
-}
-
-.grid {
-  display:grid;
-  grid-template-columns:370px 1fr;
-  gap:16px;
-}
-
-.panel {
-  background:linear-gradient(160deg,#171717,#0c0c0c);
-  border:1px solid var(--border);
-  border-radius:17px;
-  padding:15px;
-  min-width:0;
-}
-
-.panel-title {
-  color:var(--gold-light);
-  font-size:12px;
-  font-weight:900;
-  letter-spacing:1.5px;
-  margin-bottom:14px;
-}
-
-.field {
-  margin-bottom:13px;
-}
-
-.field label {
-  display:block;
-  color:#ccc;
-  font-size:11px;
-  font-weight:800;
-  margin-bottom:7px;
-}
-
-.field input,
-.field textarea,
-.field select {
-  width:100%;
-  background:#080808;
-  color:white;
-  border:1px solid #333;
-  border-radius:10px;
-  padding:12px;
-  outline:none;
-}
-
-.field input:focus,
-.field textarea:focus,
-.field select:focus {
-  border-color:var(--gold);
-}
-
-.field textarea {
-  min-height:85px;
-  resize:vertical;
-}
-
-.upload {
-  width:100%;
-  background:#080808;
-  color:#ccc;
-  padding:11px;
-  border:1px solid #333;
-  border-radius:10px;
-}
-
-.photo-box {
-  min-height:145px;
-  background:#080808;
-  border:1px dashed #555;
-  border-radius:13px;
-  overflow:hidden;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin-bottom:10px;
-}
-
-.photo-box img {
-  width:100%;
-  max-height:280px;
-  object-fit:cover;
-  display:none;
-}
-
-.photo-empty {
-  color:#777;
-  font-size:12px;
-  text-align:center;
-  padding:25px;
-}
-
-.style-grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-}
-
-.style {
-  padding:12px 7px;
-  border:1px solid #333;
-  background:#090909;
-  color:#aaa;
-  border-radius:10px;
-  font-size:10px;
-  font-weight:900;
-}
-
-.style.active {
-  color:var(--gold-light);
-  border-color:var(--gold);
-  background:#29200e;
-}
-
-.primary {
-  width:100%;
-  border:0;
-  padding:14px;
-  border-radius:11px;
-  background:linear-gradient(135deg,#ffe09a,#bd8422);
-  color:#080808;
-  font-weight:1000;
-  margin-top:9px;
-}
-
-.secondary {
-  border:1px solid #383838;
-  background:#141414;
-  color:white;
-  padding:12px;
-  border-radius:10px;
-  font-weight:800;
-}
-
-.preview-head {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:8px;
-  margin-bottom:12px;
-}
-
-.preview-head small {
-  color:#888;
-  font-size:10px;
-}
-
-.flyer-stage {
-  background:#080808;
-  border:1px solid #292929;
-  border-radius:13px;
-  padding:12px;
-  display:flex;
-  justify-content:center;
-}
-
-#flyer {
-  width:100%;
-  max-width:430px;
-  aspect-ratio:4/5;
-  position:relative;
-  overflow:hidden;
-  background:#111;
-  color:white;
-}
-
-.flyer-bg {
-  position:absolute;
-  inset:0;
-  background:
-    radial-gradient(circle at 50% 15%,#60440f,transparent 40%),
-    linear-gradient(140deg,#080808,#281b08);
-}
-
-.flyer-photo {
-  position:absolute;
-  inset:0;
-  background-position:center;
-  background-size:cover;
-  display:none;
-}
-
-.flyer-overlay {
-  position:absolute;
-  inset:0;
-  background:linear-gradient(
-    to bottom,
-    rgba(0,0,0,.15),
-    rgba(0,0,0,.3) 35%,
-    rgba(0,0,0,.92) 100%
-  );
-}
-
-.flyer-frame {
-  position:absolute;
-  inset:12px;
-  border:1px solid rgba(255,220,145,.45);
-  pointer-events:none;
-}
-
-.flyer-brand {
-  position:absolute;
-  top:28px;
-  left:25px;
-  color:#ffe09a;
-  font-size:10px;
-  letter-spacing:3px;
-  font-weight:900;
-}
-
-.flyer-content {
-  position:absolute;
-  inset:0;
-  padding:28px;
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-end;
-  text-align:center;
-}
-
-.flyer-label {
-  font-size:10px;
-  color:#ffe09a;
-  letter-spacing:3px;
-  font-weight:900;
-  margin-bottom:10px;
-}
-
-.flyer-name {
-  font-size:clamp(25px,7vw,39px);
-  font-weight:1000;
-  line-height:1;
-  text-transform:uppercase;
-  overflow-wrap:anywhere;
-}
-
-.flyer-event {
-  font-size:17px;
-  font-weight:900;
-  margin-top:10px;
-}
-
-.flyer-message {
-  font-size:12px;
-  line-height:1.5;
-  color:#ddd;
-  margin:10px auto 0;
-  max-width:95%;
-  overflow-wrap:anywhere;
-}
-
-.flyer-info {
-  display:flex;
-  justify-content:center;
-  flex-wrap:wrap;
-  gap:7px;
-  margin-top:15px;
-}
-
-.flyer-chip {
-  padding:7px 9px;
-  background:rgba(0,0,0,.65);
-  border:1px solid #777;
-  border-radius:30px;
-  font-size:9px;
-}
-
-.flyer-social {
-  color:#ccc;
-  font-size:9px;
-  margin-top:13px;
-  overflow-wrap:anywhere;
-}
-
-.download-grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-top:12px;
-}
-
-.note {
-  padding:11px;
-  background:#0b0b0b;
-  border:1px solid #292929;
-  border-radius:10px;
-  color:#888;
-  font-size:10px;
-  line-height:1.5;
-  margin-top:12px;
-}
-
-.theme-luxury .flyer-bg {
-  background:
-    radial-gradient(circle at 50% 10%,#795719,transparent 40%),
-    linear-gradient(140deg,#050505,#241702);
-}
-
-.theme-ivory .flyer-bg {
-  background:linear-gradient(140deg,#eee1bd,#99835d);
-}
-
-.theme-ivory .flyer-overlay {
-  background:linear-gradient(
-    to bottom,
-    rgba(30,20,10,.1),
-    rgba(30,20,10,.8)
-  );
-}
-
-.theme-rose .flyer-bg {
-  background:
-    radial-gradient(circle at 20% 15%,#9c315c,transparent 40%),
-    linear-gradient(140deg,#16040c,#50162f);
-}
-
-.theme-business .flyer-bg {
-  background:linear-gradient(140deg,#061d2c,#07101b);
-}
-
-.theme-business .flyer-label {
-  color:#75d6ff;
-}
-
-.theme-celebration .flyer-bg {
-  background:
-    radial-gradient(circle at 20% 20%,#b67812,transparent 30%),
-    radial-gradient(circle at 80% 30%,#642d83,transparent 30%),
-    linear-gradient(140deg,#1b0928,#1b1003);
-}
-
-.theme-church .flyer-bg {
-  background:
-    radial-gradient(circle at 50% 5%,#745317,transparent 40%),
-    linear-gradient(140deg,#080808,#211b0c);
-}
-
-.theme-graduation .flyer-bg {
-  background:linear-gradient(140deg,#061c38,#153c65);
-}
-
-.theme-graduation .flyer-label {
-  color:#9ed7ff;
-}
-
-.voice-card {
-  padding:12px;
-  border:1px solid #303030;
-  background:#090909;
-  border-radius:11px;
-  margin-bottom:8px;
-}
-
-.voice-card strong {
-  display:block;
-  color:var(--gold-light);
-  font-size:12px;
-}
-
-.voice-card small {
-  display:block;
-  color:#888;
-  margin-top:4px;
-  font-size:10px;
-}
-
-.admin-box {
-  padding:13px;
-  border:1px solid #57411d;
-  background:#171106;
-  border-radius:12px;
-  margin-top:13px;
-}
-
-.admin-box h3 {
-  font-size:12px;
-  color:var(--gold-light);
-  margin-bottom:10px;
-}
-
-.admin-durations {
-  display:none;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-top:10px;
-}
-
-.admin-durations.show {
-  display:grid;
-}
-
-.duration {
-  width:100%;
-  background:#090909;
-  border:1px solid #333;
-  color:#aaa;
-  padding:12px;
-  border-radius:10px;
-  font-weight:900;
-}
-
-.duration.active {
-  color:#090909;
-  background:linear-gradient(135deg,#ffe09a,#bd8422);
-}
-
-.status {
-  display:none;
-  padding:13px;
-  margin-top:12px;
-  border:1px solid #444;
-  background:#090909;
-  color:#ddd;
-  border-radius:10px;
-  font-size:11px;
-  line-height:1.5;
-}
-
-.spinner {
-  display:inline-block;
-  width:15px;
-  height:15px;
-  border:2px solid #555;
-  border-top-color:#ffe09a;
-  border-radius:50%;
-  animation:spin .8s linear infinite;
-  vertical-align:middle;
-  margin-right:7px;
-}
-
-@keyframes spin {
-  to {transform:rotate(360deg)}
-}
-
-.video-result {
-  display:none;
-  margin-top:12px;
-}
-
-.video-result video {
-  width:100%;
-  background:black;
-  border-radius:12px;
-}
-
-/* =========================
-   ADAMI CODE BUILDER
-========================= */
-
-.code-rules {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.rule-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 14px;
-  background: rgba(255,255,255,.035);
-}
-
-.rule-icon {
-  font-size: 24px;
-  width: 36px;
-  text-align: center;
-}
-
-.rule-card strong {
-  display: block;
-  font-size: 14px;
-}
-
-.rule-card span {
-  display: block;
-  margin-top: 4px;
-  color: #aaa;
-  font-size: 12px;
-}
-
-.security-list {
-  display: grid;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.security-list div {
-  padding: 11px 12px;
-  border-radius: 10px;
-  background: rgba(255,255,255,.035);
-  color: #ddd;
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.field-label {
-  display: block;
-  margin-top: 18px;
-  margin-bottom: 7px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: #aaa;
-}
-
-.text-input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 13px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: #111;
-  color: #fff;
-  font: inherit;
-  outline: none;
-}
-
-.text-input:focus {
-  border-color: #d6b45a;
-}
-
-.code-limit-box {
-  margin-top: 18px;
-  padding: 14px;
-  border-radius: 14px;
-  background: rgba(255,255,255,.035);
-  border: 1px solid rgba(255,255,255,.10);
-}
-
-.code-limit-box strong {
-  display: block;
-  margin-bottom: 10px;
-  font-size: 12px;
-  letter-spacing: 1px;
-}
-
-.limit-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255,255,255,.06);
-  font-size: 13px;
-}
-
-.limit-row:last-child {
-  border-bottom: none;
-}
-
-.limit-row span {
-  color: #aaa;
-}
-
-.limit-row b {
-  color: #d6b45a;
-}
-
-.primary-btn {
-  width:100%;
-  border:0;
-  padding:14px;
-  border-radius:11px;
-  background:linear-gradient(135deg,#ffe09a,#bd8422);
-  color:#080808;
-  font-weight:1000;
-  margin-top:14px;
-  cursor:pointer;
-}
-
-@media(max-width:800px) {
-  .grid {
-    grid-template-columns:1fr;
-  }
-}
-
-@media(max-width:480px) {
-  .hero h2 {
-    font-size:24px;
-  }
-
-  .panel {
-    padding:12px;
-  }
-
-  .download-grid {
-    grid-template-columns:1fr;
-  }
-
-  .flyer-content {
-    padding:22px;
-  }
-}
+:root { --bg:#070707; --panel:#111; --panel2:#181818; --gold:#d7a642; --gold-light:#ffe09a; --white:#fff; --muted:#999; --green:#24d77a; --border:#303030; }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background: radial-gradient(circle at top,#30220d 0,#101010 35%,#050505 85%); color:white; font-family:Arial,Helvetica,sans-serif; min-height:100vh; }
+button,input,textarea,select { font:inherit; }
+button { cursor:pointer; }
+.topbar { position:sticky; top:0; z-index:100; background:rgba(5,5,5,.96); backdrop-filter:blur(15px); border-bottom:1px solid rgba(215,166,66,.3); padding:12px; }
+.top-inner { max-width:1150px; margin:auto; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.brand { display:flex; align-items:center; gap:10px; }
+.logo { width:43px; height:43px; border-radius:13px; display:grid; place-items:center; background:linear-gradient(135deg,#ffe39b,#a66a0e); color:#090909; font-size:25px; font-weight:1000; }
+.brand h1 { font-size:15px; letter-spacing:2px; }
+.brand small { display:block; color:#999; font-size:9px; margin-top:4px; letter-spacing:1px; }
+.online { color:#8af3b5; border:1px solid #246b42; background:#0d2417; padding:8px 11px; border-radius:30px; font-size:10px; white-space:nowrap; }
+.tabs { max-width:1150px; margin:13px auto 0; display:grid; grid-template-columns:1fr 1fr 1fr; background:#111; padding:5px; border-radius:12px; border:1px solid #292929; }
+.tab { border:0; background:transparent; color:#999; padding:12px; border-radius:9px; font-weight:900; }
+.tab.active { background:linear-gradient(135deg,#ffe09a,#bd8422); color:#080808; }
+.page { display:none; max-width:1150px; margin:auto; padding:20px 12px 70px; }
+.page.active { display:block; }
+.hero { text-align:center; padding:15px 5px 23px; }
+.hero h2 { font-size:29px; margin-bottom:9px; }
+.hero h2 span { color:var(--gold-light); }
+.hero p { color:#aaa; font-size:13px; line-height:1.6; max-width:650px; margin:auto; }
+.grid { display:grid; grid-template-columns:370px 1fr; gap:16px; }
+.panel { background:linear-gradient(160deg,#171717,#0c0c0c); border:1px solid var(--border); border-radius:17px; padding:15px; min-width:0; }
+.panel-title { color:var(--gold-light); font-size:12px; font-weight:900; letter-spacing:1.5px; margin-bottom:14px; }
+.field { margin-bottom:13px; }
+.field label { display:block; color:#ccc; font-size:11px; font-weight:800; margin-bottom:7px; }
+.field input,.field textarea,.field select { width:100%; background:#080808; color:white; border:1px solid #333; border-radius:10px; padding:12px; outline:none; }
+.field input:focus,.field textarea:focus,.field select:focus { border-color:var(--gold); }
+.field textarea { min-height:85px; resize:vertical; }
+.upload { width:100%; background:#080808; color:#ccc; padding:11px; border:1px solid #333; border-radius:10px; }
+.photo-box { min-height:145px; background:#080808; border:1px dashed #555; border-radius:13px; overflow:hidden; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+.photo-box img { width:100%; max-height:280px; object-fit:cover; display:none; }
+.photo-empty { color:#777; font-size:12px; text-align:center; padding:25px; }
+.style-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.style { padding:12px 7px; border:1px solid #333; background:#090909; color:#aaa; border-radius:10px; font-size:10px; font-weight:900; }
+.style.active { color:var(--gold-light); border-color:var(--gold); background:#29200e; }
+.primary { width:100%; border:0; padding:14px; border-radius:11px; background:linear-gradient(135deg,#ffe09a,#bd8422); color:#080808; font-weight:1000; margin-top:9px; }
+.secondary { border:1px solid #383838; background:#141414; color:white; padding:12px; border-radius:10px; font-weight:800; }
+.preview-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px; }
+.preview-head small { color:#888; font-size:10px; }
+.flyer-stage { background:#080808; border:1px solid #292929; border-radius:13px; padding:12px; display:flex; justify-content:center; }
+#flyer { width:100%; max-width:430px; aspect-ratio:4/5; position:relative; overflow:hidden; background:#111; color:white; }
+.flyer-bg { position:absolute; inset:0; background: radial-gradient(circle at 50% 15%,#60440f,transparent 40%), linear-gradient(140deg,#080808,#281b08); }
+.flyer-photo { position:absolute; inset:0; background-position:center; background-size:cover; display:none; }
+.flyer-overlay { position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,.15), rgba(0,0,0,.3) 35%, rgba(0,0,0,.92) 100%); }
+.flyer-frame { position:absolute; inset:12px; border:1px solid rgba(255,220,145,.45); pointer-events:none; }
+.flyer-brand { position:absolute; top:28px; left:25px; color:#ffe09a; font-size:10px; letter-spacing:3px; font-weight:900; }
+.flyer-content { position:absolute; inset:0; padding:28px; display:flex; flex-direction:column; justify-content:flex-end; text-align:center; }
+.flyer-label { font-size:10px; color:#ffe09a; letter-spacing:3px; font-weight:900; margin-bottom:10px; }
+.flyer-name { font-size:clamp(25px,7vw,39px); font-weight:1000; line-height:1; text-transform:uppercase; overflow-wrap:anywhere; }
+.flyer-event { font-size:17px; font-weight:900; margin-top:10px; }
+.flyer-message { font-size:12px; line-height:1.5; color:#ddd; margin:10px auto 0; max-width:95%; overflow-wrap:anywhere; }
+.flyer-info { display:flex; justify-content:center; flex-wrap:wrap; gap:7px; margin-top:15px; }
+.flyer-chip { padding:7px 9px; background:rgba(0,0,0,.65); border:1px solid #777; border-radius:30px; font-size:9px; }
+.flyer-social { color:#ccc; font-size:9px; margin-top:13px; overflow-wrap:anywhere; }
+.download-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+.note { padding:11px; background:#0b0b0b; border:1px solid #292929; border-radius:10px; color:#888; font-size:10px; line-height:1.5; margin-top:12px; }
+.theme-luxury .flyer-bg { background: radial-gradient(circle at 50% 10%,#795719,transparent 40%), linear-gradient(140deg,#050505,#241702); }
+.theme-ivory .flyer-bg { background:linear-gradient(140deg,#eee1bd,#99835d); }
+.theme-ivory .flyer-overlay { background:linear-gradient(to bottom, rgba(30,20,10,.1), rgba(30,20,10,.8)); }
+.theme-rose .flyer-bg { background: radial-gradient(circle at 20% 15%,#9c315c,transparent 40%), linear-gradient(140deg,#16040c,#50162f); }
+.theme-business .flyer-bg { background:linear-gradient(140deg,#061d2c,#07101b); }
+.theme-business .flyer-label { color:#75d6ff; }
+.theme-celebration .flyer-bg { background: radial-gradient(circle at 20% 20%,#b67812,transparent 30%), radial-gradient(circle at 80% 30%,#642d83,transparent 30%), linear-gradient(140deg,#1b0928,#1b1003); }
+.theme-church .flyer-bg { background: radial-gradient(circle at 50% 5%,#745317,transparent 40%), linear-gradient(140deg,#080808,#211b0c); }
+.theme-graduation .flyer-bg { background:linear-gradient(140deg,#061c38,#153c65); }
+.theme-graduation .flyer-label { color:#9ed7ff; }
+.voice-card { padding:12px; border:1px solid #303030; background:#090909; border-radius:11px; margin-bottom:8px; }
+.voice-card strong { display:block; color:var(--gold-light); font-size:12px; }
+.voice-card small { display:block; color:#888; margin-top:4px; font-size:10px; }
+.admin-box { padding:13px; border:1px solid #57411d; background:#171106; border-radius:12px; margin-top:13px; }
+.admin-box h3 { font-size:12px; color:var(--gold-light); margin-bottom:10px; }
+.admin-durations { display:none; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+.admin-durations.show { display:grid; }
+.duration { width:100%; background:#090909; border:1px solid #333; color:#aaa; padding:12px; border-radius:10px; font-weight:900; }
+.duration.active { color:#090909; background:linear-gradient(135deg,#ffe09a,#bd8422); }
+.status { display:none; padding:13px; margin-top:12px; border:1px solid #444; background:#090909; color:#ddd; border-radius:10px; font-size:11px; line-height:1.5; }
+.spinner { display:inline-block; width:15px; height:15px; border:2px solid #555; border-top-color:#ffe09a; border-radius:50%; animation:spin .8s linear infinite; vertical-align:middle; margin-right:7px; }
+@keyframes spin { to {transform:rotate(360deg)} }
+.video-result { display:none; margin-top:12px; }
+.video-result video { width:100%; background:black; border-radius:12px; }
+.code-rules { display:grid; grid-template-columns:1fr; gap:10px; margin-top:16px; }
+.rule-card { display:flex; align-items:center; gap:12px; padding:14px; border:1px solid rgba(255,255,255,.10); border-radius:14px; background:rgba(255,255,255,.035); }
+.rule-icon { font-size:24px; width:36px; text-align:center; }
+.rule-card strong { display:block; font-size:14px; }
+.rule-card span { display:block; margin-top:4px; color:#aaa; font-size:12px; }
+.security-list { display:grid; gap:10px; margin-top:14px; }
+.security-list div { padding:11px 12px; border-radius:10px; background:rgba(255,255,255,.035); color:#ddd; font-size:13px; line-height:1.45; }
+.field-label { display:block; margin-top:18px; margin-bottom:7px; font-size:11px; font-weight:800; letter-spacing:1px; color:#aaa; }
+.text-input { width:100%; box-sizing:border-box; padding:13px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:#111; color:#fff; font:inherit; outline:none; }
+.text-input:focus { border-color:#d6b45a; }
+.code-limit-box { margin-top:18px; padding:14px; border-radius:14px; background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.10); }
+.code-limit-box strong { display:block; margin-bottom:10px; font-size:12px; letter-spacing:1px; }
+.limit-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); font-size:13px; }
+.limit-row:last-child { border-bottom:none; }
+.limit-row span { color:#aaa; }
+.limit-row b { color:#d6b45a; }
+.primary-btn { width:100%; border:0; padding:14px; border-radius:11px; background:linear-gradient(135deg,#ffe09a,#bd8422); color:#080808; font-weight:1000; margin-top:14px; cursor:pointer; }
+@media(max-width:800px){ .grid{ grid-template-columns:1fr; } }
+@media(max-width:480px){ .hero h2{ font-size:24px; } .panel{ padding:12px; } .download-grid{ grid-template-columns:1fr; } .flyer-content{ padding:22px; } }
 </style>
 </head>
-
 <body>
-
 <header class="topbar">
-
   <div class="top-inner">
-
-    <div class="brand">
-      <div class="logo">A</div>
-
-      <div>
-        <h1>ADAMI STUDIO</h1>
-        <small>PREMIUM CREATIVE AI</small>
-      </div>
-    </div>
-
+    <div class="brand"><div class="logo">A</div><div><h1>ADAMI STUDIO</h1><small>PREMIUM CREATIVE AI</small></div></div>
     <div class="online">● STUDIO ONLINE</div>
-
   </div>
-
   <div class="tabs">
-
-    <button
-      class="tab active"
-      onclick="showPage('flyerPage',this)">
-      FLYER STUDIO
-    </button>
-
-    <button
-      class="tab"
-      onclick="showPage('cartoonPage',this)">
-      CARTOON AI
-    </button>
-
-    <button
-      class="tab"
-      onclick="showPage('codePage',this)">
-      AI CODE BUILDER
-    </button>
-
-</div>
-
+    <button class="tab active" onclick="showPage('flyerPage',this)">FLYER STUDIO</button>
+    <button class="tab" onclick="showPage('cartoonPage',this)">CARTOON AI</button>
+    <button class="tab" onclick="showPage('codePage',this)">AI CODE BUILDER</button>
+  </div>
 </header>
 
-<!-- =========================
-     FLYER STUDIO
-========================= -->
-
 <section id="flyerPage" class="page active">
-
-  <div class="hero">
-    <h2>Design <span>Like a Professional</span></h2>
-
-    <p>
-      Create premium birthday, wedding, church, business,
-      celebration and promotional flyers.
-    </p>
-  </div>
-
+  <div class="hero"><h2>Design <span>Like a Professional</span></h2><p>Create premium birthday, wedding, church, business, celebration and promotional flyers.</p></div>
   <div class="grid">
-
     <div class="panel">
-
       <div class="panel-title">FLYER INFORMATION</div>
-
-      <div class="field">
-
-        <label>UPLOAD YOUR PHOTO</label>
-
-        <div class="photo-box">
-
-          <div class="photo-empty" id="photoEmpty">
-            📸<br><br>
-            Your uploaded photo appears here
-          </div>
-
-          <img id="photoPreview" alt="Flyer photo">
-
-        </div>
-
-        <input
-          class="upload"
-          type="file"
-          id="photoInput"
-          accept="image/jpeg,image/png,image/webp">
-
-      </div>
-
-      <div class="field">
-        <label>YOUR NAME / BRAND</label>
-
-        <input
-          id="name"
-          placeholder="e.g. KING KINGSLEY"
-          maxlength="60">
-      </div>
-
-      <div class="field">
-        <label>EVENT TITLE</label>
-
-        <input
-          id="event"
-          placeholder="e.g. GRAND BIRTHDAY CELEBRATION"
-          maxlength="100">
-      </div>
-
-      <div class="field">
-        <label>DATE AND TIME</label>
-
-        <input
-          id="date"
-          placeholder="Saturday • 7:00 PM"
-          maxlength="80">
-      </div>
-
-      <div class="field">
-        <label>VENUE</label>
-
-        <input
-          id="venue"
-          placeholder="Warri, Delta State"
-          maxlength="120">
-      </div>
-
-      <div class="field">
-        <label>YOUR MESSAGE</label>
-
-        <textarea
-          id="message"
-          placeholder="Write your invitation or promotional message..."
-          maxlength="500"></textarea>
-      </div>
-
-      <div class="field">
-        <label>YOUTUBE CHANNEL</label>
-
-        <input
-          id="youtube"
-          placeholder="@YourChannel"
-          maxlength="80">
-      </div>
-
-      <div class="field">
-        <label>X / TWITTER</label>
-
-        <input
-          id="twitter"
-          placeholder="@YourHandle"
-          maxlength="80">
-      </div>
-
-      <div class="panel-title" style="margin-top:20px">
-        SELECT FLYER DESIGN
-      </div>
-
+      <div class="field"><label>UPLOAD YOUR PHOTO</label><div class="photo-box"><div class="photo-empty" id="photoEmpty">📸<br><br>Your uploaded photo appears here</div><img id="photoPreview" alt="Flyer photo"></div><input class="upload" type="file" id="photoInput" accept="image/jpeg,image/png,image/webp"></div>
+      <div class="field"><label>YOUR NAME / BRAND</label><input id="name" placeholder="e.g. KING KINGSLEY" maxlength="60"></div>
+      <div class="field"><label>EVENT TITLE</label><input id="event" placeholder="e.g. GRAND BIRTHDAY CELEBRATION" maxlength="100"></div>
+      <div class="field"><label>DATE AND TIME</label><input id="date" placeholder="Saturday • 7:00 PM" maxlength="80"></div>
+      <div class="field"><label>VENUE</label><input id="venue" placeholder="Warri, Delta State" maxlength="120"></div>
+      <div class="field"><label>YOUR MESSAGE</label><textarea id="message" placeholder="Write your invitation or promotional message..." maxlength="500"></textarea></div>
+      <div class="field"><label>YOUTUBE CHANNEL</label><input id="youtube" placeholder="@YourChannel" maxlength="80"></div>
+      <div class="field"><label>X / TWITTER</label><input id="twitter" placeholder="@YourHandle" maxlength="80"></div>
+      <div class="panel-title" style="margin-top:20px">SELECT FLYER DESIGN</div>
       <div class="style-grid">
-
-        <button class="style active"
-          onclick="selectStyle(this,'luxury')">
-          ✦ LUXURY GOLD
-        </button>
-
-        <button class="style"
-          onclick="selectStyle(this,'ivory')">
-          ◇ ELEGANT IVORY
-        </button>
-
-        <button class="style"
-          onclick="selectStyle(this,'rose')">
-          ♡ MIDNIGHT ROSE
-        </button>
-
-        <button class="style"
-          onclick="selectStyle(this,'business')">
-          ◈ BUSINESS
-        </button>
-
-        <button class="style"
-          onclick="selectStyle(this,'celebration')">
-          ✨ CELEBRATION
-        </button>
-
-        <button class="style"
-          onclick="selectStyle(this,'church')">
-          ✝ CHURCH
-        </button>
-
-        <button class="style"
-          onclick="selectStyle(this,'graduation')">
-          🎓 GRADUATION
-        </button>
-
+        <button class="style active" onclick="selectStyle(this,'luxury')">✦ LUXURY GOLD</button>
+        <button class="style" onclick="selectStyle(this,'ivory')">◇ ELEGANT IVORY</button>
+        <button class="style" onclick="selectStyle(this,'rose')">♡ MIDNIGHT ROSE</button>
+        <button class="style" onclick="selectStyle(this,'business')">◈ BUSINESS</button>
+        <button class="style" onclick="selectStyle(this,'celebration')">✨ CELEBRATION</button>
+        <button class="style" onclick="selectStyle(this,'church')">✝ CHURCH</button>
+        <button class="style" onclick="selectStyle(this,'graduation')">🎓 GRADUATION</button>
       </div>
-
-      <button class="primary" onclick="updateFlyer()">
-        ✨ UPDATE MY FLYER
-      </button>
-
-      <div class="note">
-        Your flyer is designed on this page. You can change
-        any information and see the preview update.
-      </div>
-
+      <button class="primary" onclick="updateFlyer()">✨ UPDATE MY FLYER</button>
+      <div class="note">Your flyer is designed on this page. You can change any information and see the preview update.</div>
     </div>
-
     <div class="panel">
-
-      <div class="preview-head">
-        <div class="panel-title" style="margin:0">
-          LIVE FLYER PREVIEW
-        </div>
-
-        <small>4:5 SOCIAL DESIGN</small>
-      </div>
-
-      <div class="flyer-stage">
-
-        <div id="flyer" class="theme-luxury">
-
-          <div class="flyer-bg"></div>
-
-          <div id="flyerPhoto" class="flyer-photo"></div>
-
-          <div class="flyer-overlay"></div>
-
-          <div class="flyer-frame"></div>
-
-          <div class="flyer-brand">
-            ADAMI STUDIO
-          </div>
-
-          <div class="flyer-content">
-
-            <div class="flyer-label">
-              YOU ARE INVITED
-            </div>
-
-            <div class="flyer-name" id="outName">
-              YOUR NAME
-            </div>
-
-            <div class="flyer-event" id="outEvent">
-              YOUR EVENT
-            </div>
-
-            <div class="flyer-message" id="outMessage">
-              Your message will appear here.
-            </div>
-
-            <div class="flyer-info">
-
-              <div class="flyer-chip" id="outDate">
-                📅 DATE AND TIME
-              </div>
-
-              <div class="flyer-chip" id="outVenue">
-                📍 VENUE
-              </div>
-
-            </div>
-
-            <div class="flyer-social" id="outSocial">
-              ADAMI STUDIO
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      <div class="download-grid">
-
-        <button
-          class="primary"
-          style="margin:0"
-          id="downloadFlyerButton"
-          onclick="downloadFlyer()">
-          ⬇ DOWNLOAD PNG
-        </button>
-
-        <button
-          class="secondary"
-          onclick="resetFlyer()">
-          ↻ NEW FLYER
-        </button>
-
-      </div>
-
-      <button
-        class="primary"
-        onclick="showPage('cartoonPage',document.querySelectorAll('.tab')[1])">
-        🎬 MAKE CARTOON →
-      </button>
-
+      <div class="preview-head"><div class="panel-title" style="margin:0">LIVE FLYER PREVIEW</div><small>4:5 SOCIAL DESIGN</small></div>
+      <div class="flyer-stage"><div id="flyer" class="theme-luxury"><div class="flyer-bg"></div><div id="flyerPhoto" class="flyer-photo"></div><div class="flyer-overlay"></div><div class="flyer-frame"></div><div class="flyer-brand">ADAMI STUDIO</div><div class="flyer-content"><div class="flyer-label">YOU ARE INVITED</div><div class="flyer-name" id="outName">YOUR NAME</div><div class="flyer-event" id="outEvent">YOUR EVENT</div><div class="flyer-message" id="outMessage">Your message will appear here.</div><div class="flyer-info"><div class="flyer-chip" id="outDate">📅 DATE AND TIME</div><div class="flyer-chip" id="outVenue">📍 VENUE</div></div><div class="flyer-social" id="outSocial">ADAMI STUDIO</div></div></div></div>
+      <div class="download-grid"><button class="primary" style="margin:0" id="downloadFlyerButton" onclick="downloadFlyer()">⬇ DOWNLOAD PNG</button><button class="secondary" onclick="resetFlyer()">↻ NEW FLYER</button></div>
+      <button class="primary" onclick="showPage('cartoonPage',document.querySelectorAll('.tab')[1])">🎬 MAKE CARTOON →</button>
     </div>
-
   </div>
-
 </section>
-
-<!-- =========================
-     CARTOON AI STUDIO
-========================= -->
 
 <section id="cartoonPage" class="page">
-
-  <div class="hero">
-
-    <h2>Real <span>AI Cartoon Studio</span></h2>
-
-    <p>
-      Turn your uploaded character photo into a cinematic
-      AI video using the Runway generation backend.
-    </p>
-
-  </div>
-
+  <div class="hero"><h2>Real <span>AI Cartoon Studio</span></h2><p>Turn your uploaded character photo into a cinematic AI video using the Runway generation backend.</p></div>
   <div class="grid">
-
     <div class="panel">
-
       <div class="panel-title">CHARACTER SETTINGS</div>
-
-      <div class="photo-box">
-
-        <div class="photo-empty" id="cartoonEmpty">
-          🤖<br><br>
-          Upload your character photo
-        </div>
-
-        <img id="cartoonPhotoPreview" alt="AI character">
-
-      </div>
-
-      <div class="field">
-
-        <label>CHARACTER PHOTO</label>
-
-        <input
-          class="upload"
-          type="file"
-          id="cartoonPhoto"
-          accept="image/jpeg,image/png,image/webp">
-
-      </div>
-
-      <div class="field">
-
-        <label>VISUAL STYLE</label>
-
-        <select id="cartoonStyle">
-
-          <option value="realistic human cartoon">
-            Real Human Cartoon
-          </option>
-
-          <option value="3D cinematic character">
-            3D Character
-          </option>
-
-          <option value="African animated character">
-            African Cartoon
-          </option>
-
-          <option value="cinematic realistic character">
-            Cinematic
-          </option>
-
-        </select>
-
-      </div>
-
-      <div class="field">
-
-        <label>DRAMA SCRIPT</label>
-
-        <textarea
-          id="dramaScript"
-          placeholder="Write what your character should say or do..."></textarea>
-
-      </div>
-
-      <div class="field">
-
-        <label>SCENE DIRECTION</label>
-
-        <textarea
-          id="direction"
-          placeholder="Example: A Warri man standing in a Nigerian compound, talking with natural hand movements."></textarea>
-
-      </div>
-
-      <div class="panel-title" style="margin-top:18px">
-        NIGERIAN VOICE OPTIONS
-      </div>
-
-      <div class="voice-card">
-        <strong>Main Naija Pidgin — Male</strong>
-        <small>Male Nigerian Pidgin voice</small>
-      </div>
-
-      <div class="voice-card">
-        <strong>Warri Babe — Female</strong>
-        <small>Female Nigerian Pidgin voice</small>
-      </div>
-
-      <div class="field">
-
-        <label>SELECT VOICE</label>
-
-        <select id="voice">
-
-          <option value="main-naija-pidgin">
-            Main Naija Pidgin — Male
-          </option>
-
-          <option value="warri-babe">
-            Warri Babe — Female
-          </option>
-
-          <option value="custom">
-            Custom Voice
-          </option>
-
-        </select>
-
-      </div>
-
-      <div class="field">
-
-        <label>CHARACTER EMOTION</label>
-
-        <select id="emotion">
-
-          <option>Natural</option>
-          <option>Happy</option>
-          <option>Funny</option>
-          <option>Serious</option>
-          <option>Angry</option>
-          <option>Excited</option>
-          <option>Sad</option>
-          <option>Surprised</option>
-
-        </select>
-
-      </div>
-
-      <div class="panel-title" style="margin-top:18px">
-        PUBLIC VIDEO
-      </div>
-
-      <button
-        class="duration active"
-        id="publicDuration"
-        onclick="selectDuration(10,this)">
-        🎬 10 SECONDS — PUBLIC
-      </button>
-
+      <div class="photo-box"><div class="photo-empty" id="cartoonEmpty">🤖<br><br>Upload your character photo</div><img id="cartoonPhotoPreview" alt="AI character"></div>
+      <div class="field"><label>CHARACTER PHOTO</label><input class="upload" type="file" id="cartoonPhoto" accept="image/jpeg,image/png,image/webp"></div>
+      <div class="field"><label>VISUAL STYLE</label><select id="cartoonStyle"><option value="realistic human cartoon">Real Human Cartoon</option><option value="3D cinematic character">3D Character</option><option value="African animated character">African Cartoon</option><option value="cinematic realistic character">Cinematic</option></select></div>
+      <div class="field"><label>DRAMA SCRIPT</label><textarea id="dramaScript" placeholder="Write what your character should say or do..."></textarea></div>
+      <div class="field"><label>SCENE DIRECTION</label><textarea id="direction" placeholder="Example: A Warri man standing in a Nigerian compound, talking with natural hand movements."></textarea></div>
+      <div class="panel-title" style="margin-top:18px">NIGERIAN VOICE OPTIONS</div>
+      <div class="voice-card"><strong>Main Naija Pidgin — Male</strong><small>Male Nigerian Pidgin voice</small></div>
+      <div class="voice-card"><strong>Warri Babe — Female</strong><small>Female Nigerian Pidgin voice</small></div>
+      <div class="field"><label>SELECT VOICE</label><select id="voice"><option value="main-naija-pidgin">Main Naija Pidgin — Male</option><option value="warri-babe">Warri Babe — Female</option><option value="custom">Custom Voice</option></select></div>
+      <div class="field"><label>CHARACTER EMOTION</label><select id="emotion"><option value="Natural">Natural</option><option value="Scared">Scared — Fear / Horror</option><option value="Happy">Happy</option><option value="Funny">Funny</option><option value="Serious">Serious</option><option value="Angry">Angry</option><option value="Excited">Excited</option><option value="Sad">Sad</option><option value="Surprised">Surprised</option></select></div>
+      <div class="panel-title" style="margin-top:18px">PUBLIC VIDEO</div>
+      <button class="duration active" id="publicDuration" onclick="selectDuration(10,this)">🎬 10 SECONDS — PUBLIC</button>
       <div class="admin-box">
-
         <h3>🔐 CHAIRMAN / ADMIN STUDIO</h3>
-
-        <div class="field">
-
-          <label>ADMIN ACCESS TOKEN</label>
-
-          <input
-            id="adminToken"
-            type="password"
-            placeholder="Enter your private admin token">
-
-        </div>
-
-        <button
-          class="secondary"
-          style="width:100%"
-          onclick="unlockAdmin()">
-          UNLOCK ADMIN STUDIO
-        </button>
-
-        <div id="adminMessage" class="note">
-          Admin access is verified by the server.
-        </div>
-
+        <div class="field"><label>ADMIN ACCESS TOKEN</label><input id="adminToken" type="password" placeholder="Enter your private admin token"></div>
+        <button class="secondary" style="width:100%" onclick="unlockAdmin()">UNLOCK ADMIN STUDIO</button>
+        <div id="adminMessage" class="note">Admin access is verified by the server.</div>
         <div id="adminDurations" class="admin-durations">
-
-          <button
-            class="duration"
-            onclick="selectDuration(60,this)">
-            60 SECONDS
-          </button>
-
-          <button
-            class="duration"
-            onclick="selectDuration(120,this)">
-            120 SECONDS
-          </button>
-
+          <button class="duration" onclick="selectDuration(60,this)">60 SECONDS</button>
+          <button class="duration" onclick="selectDuration(120,this)">120 SECONDS</button>
+          <button class="duration" onclick="selectDuration(180,this)">180 SECONDS</button>
+          <button class="duration" onclick="selectDuration(240,this)">240 SECONDS</button>
         </div>
-
       </div>
-
-      <button
-        class="primary"
-        id="generateButton"
-        onclick="generateCartoon()">
-        🎬 GENERATE REAL AI VIDEO
-      </button>
-
+      <button class="primary" id="generateButton" onclick="generateCartoon()">🎬 GENERATE REAL AI VIDEO</button>
       <div id="status" class="status"></div>
-
     </div>
-
     <div class="panel">
-
-      <div class="panel-title">
-        YOUR GENERATED VIDEO
-      </div>
-
-      <div id="videoEmpty" class="note"
-        style="text-align:center;padding:55px 15px">
-
-        🎥
-
-        <br><br>
-
-        Your generated AI video will appear here.
-
-      </div>
-
-      <div id="videoResult" class="video-result">
-
-        <video
-          id="resultVideo"
-          controls
-          playsinline>
-        </video>
-
-        <div class="download-grid">
-
-          <button
-            class="primary"
-            style="margin:0"
-            onclick="downloadVideo()">
-            ⬇ DOWNLOAD MP4
-          </button>
-
-          <button
-            class="secondary"
-            onclick="newVideo()">
-            ↻ NEW VIDEO
-          </button>
-
-        </div>
-
-      </div>
-
-      <div class="note">
-        Video generation uses your configured Runway backend.
-        Video generation time depends on the AI provider.
-      </div>
-
+      <div class="panel-title">YOUR GENERATED VIDEO</div>
+      <div id="videoEmpty" class="note" style="text-align:center;padding:55px 15px">🎥<br><br>Your generated AI video will appear here.</div>
+      <div id="videoResult" class="video-result"><video id="resultVideo" controls playsinline></video><div class="download-grid"><button class="primary" style="margin:0" onclick="downloadVideo()">⬇ DOWNLOAD MP4</button><button class="secondary" onclick="newVideo()">↻ NEW VIDEO</button></div></div>
+      <div class="note">Video generation uses your configured Runway backend. Video generation time depends on the AI provider.</div>
     </div>
-
   </div>
-
 </section>
 
-<!-- =========================
-     AI CODE BUILDER
-========================= -->
-
 <section id="codePage" class="page">
-
-  <div class="hero">
-
-    <h2>Build With <span>ADAMI AI</span></h2>
-
-    <p>
-      Create websites, applications and software with
-      AI-assisted coding, testing, preview and download.
-    </p>
-
-  </div>
-
-  <!-- =========================
-       CODE BUILDER RULES
-  ========================= -->
-
-  <div class="panel">
-
-    <div class="panel-title">
-      🛡️ CODE BUILDER RULES
-    </div>
-
-    <div class="note">
-      ADAMI Code Builder is available to users under fair-use
-      limits. These limits help keep the service fast, secure
-      and available for everyone.
-    </div>
-
-    <div class="code-rules">
-
-      <div class="rule-card">
-        <div class="rule-icon">🏗️</div>
-
-        <div>
-          <strong>3 PROJECTS</strong>
-          <span>Maximum 3 active projects per user</span>
-        </div>
-      </div>
-
-      <div class="rule-card">
-        <div class="rule-icon">🤖</div>
-
-        <div>
-          <strong>5 AI BUILDS / DAY</strong>
-          <span>Maximum 5 AI build requests every day</span>
-        </div>
-      </div>
-
-      <div class="rule-card">
-        <div class="rule-icon">📁</div>
-
-        <div>
-          <strong>30 FILES / PROJECT</strong>
-          <span>Maximum 30 files in one project</span>
-        </div>
-      </div>
-
-      <div class="rule-card">
-        <div class="rule-icon">💻</div>
-
-        <div>
-          <strong>100 KB CODE</strong>
-          <span>Maximum generated code size per project</span>
-        </div>
-      </div>
-
-      <div class="rule-card">
-        <div class="rule-icon">▶️</div>
-
-        <div>
-          <strong>30 SECOND TEST</strong>
-          <span>Maximum test execution time per run</span>
-        </div>
-      </div>
-
-      <div class="rule-card">
-        <div class="rule-icon">💾</div>
-
-        <div>
-          <strong>50 MB STORAGE</strong>
-          <span>Maximum project storage per user</span>
-        </div>
-      </div>
-
-      <div class="rule-card">
-        <div class="rule-icon">📦</div>
-
-        <div>
-          <strong>ZIP DOWNLOAD</strong>
-          <span>Download your completed project as a ZIP</span>
-        </div>
-      </div>
-
-      <div class="rule-card">
-        <div class="rule-icon">👁️</div>
-
-        <div>
-          <strong>SAFE PREVIEW</strong>
-          <span>Preview projects inside an isolated environment</span>
-        </div>
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- =========================
-       SECURITY RULES
-  ========================= -->
-
-  <div class="panel">
-
-    <div class="panel-title">
-      🔒 SECURITY RULES
-    </div>
-
-    <div class="security-list">
-
-      <div>
-        ✅ Users can only access their own projects.
-      </div>
-
-      <div>
-        ✅ User code must run inside an isolated sandbox.
-      </div>
-
-      <div>
-        ✅ User code cannot access ADAMI API keys or secrets.
-      </div>
-
-      <div>
-        ✅ User code cannot access another user's project.
-      </div>
-
-      <div>
-        ✅ Direct access to the ADAMI server is prohibited.
-      </div>
-
-      <div>
-        ✅ Dangerous server commands are blocked.
-      </div>
-
-      <div>
-        ✅ Malware, credential theft, attacks and abuse are prohibited.
-      </div>
-
-      <div>
-        ✅ Excessive usage can automatically trigger rate limits.
-      </div>
-
-      <div>
-        ✅ Projects violating the rules may be suspended.
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- =========================
-       START PROJECT
-  ========================= -->
-
-  <div class="panel">
-
-    <div class="panel-title">
-      🚀 START A PROJECT
-    </div>
-
-    <label class="field-label">
-      PROJECT NAME
-    </label>
-
-    <input
-      id="codeProjectName"
-      class="text-input"
-      type="text"
-      maxlength="80"
-      placeholder="My First Website"
-      autocomplete="off"
-    >
-
-    <label class="field-label">
-      WHAT DO YOU WANT TO BUILD?
-    </label>
-
-    <textarea
-      id="codeBuildPrompt"
-      class="text-input"
-      rows="6"
-      maxlength="5000"
-      placeholder="Example: Build a modern Nigerian business website with a homepage, about page, services page and contact page."
-    ></textarea>
-
-    <label class="field-label">
-      PROGRAMMING LANGUAGE
-    </label>
-
-    <select
-      id="codeLanguage"
-      class="text-input">
-
-      <option value="html">
-        HTML / CSS / JavaScript
-      </option>
-
-      <option value="python">
-        Python
-      </option>
-
-      <option value="javascript">
-        JavaScript
-      </option>
-
-      <option value="typescript">
-        TypeScript
-      </option>
-
-      <option value="react">
-        React
-      </option>
-
-      <option value="nextjs">
-        Next.js
-      </option>
-
-    </select>
-
-    <!-- CURRENT LIMITS -->
-
-    <div class="code-limit-box">
-
-      <strong>
-        STANDARD USER LIMITS
-      </strong>
-
-      <div class="limit-row">
-        <span>Active Projects</span>
-        <b>3</b>
-      </div>
-
-      <div class="limit-row">
-        <span>AI Builds / Day</span>
-        <b>5</b>
-      </div>
-
-      <div class="limit-row">
-        <span>Files / Project</span>
-        <b>30</b>
-      </div>
-
-      <div class="limit-row">
-        <span>Code Size</span>
-        <b>100 KB</b>
-      </div>
-
-      <div class="limit-row">
-        <span>Test Time</span>
-        <b>30 sec</b>
-      </div>
-
-      <div class="limit-row">
-        <span>Storage</span>
-        <b>50 MB</b>
-      </div>
-
-    </div>
-
-    <!-- BUILD BUTTON -->
-
-    <button
-      type="button"
-      class="primary-btn"
-      id="codeBuildButton"
-      disabled
-      style="opacity:.55;cursor:not-allowed;">
-
-      🤖 BUILD WITH ADAMI AI
-
-    </button>
-
-    <div class="note">
-
-      🔐 Your project will be protected by ADAMI's
-      server-side limits and isolated execution system.
-
-      <br><br>
-
-      AI Builder backend connection will be activated
-      in the next development step.
-
-    </div>
-
-  </div>
-
+  <div class="hero"><h2>Build With <span>ADAMI AI</span></h2><p>Create websites, applications and software with AI-assisted coding, testing, preview and download.</p></div>
+  <div class="panel"><div class="panel-title">🛡️ CODE BUILDER RULES</div><div class="note">ADAMI Code Builder is available to users under fair-use limits. These limits help keep the service fast, secure and available for everyone.</div><div class="code-rules"><div class="rule-card"><div class="rule-icon">🏗️</div><div><strong>3 PROJECTS</strong><span>Maximum 3 active projects per user</span></div></div><div class="rule-card"><div class="rule-icon">🤖</div><div><strong>5 AI BUILDS / DAY</strong><span>Maximum 5 AI build requests every day</span></div></div><div class="rule-card"><div class="rule-icon">📁</div><div><strong>30 FILES / PROJECT</strong><span>Maximum 30 files in one project</span></div></div><div class="rule-card"><div class="rule-icon">💻</div><div><strong>100 KB CODE</strong><span>Maximum generated code size per project</span></div></div><div class="rule-card"><div class="rule-icon">▶️</div><div><strong>30 SECOND TEST</strong><span>Maximum test execution time per run</span></div></div><div class="rule-card"><div class="rule-icon">💾</div><div><strong>50 MB STORAGE</strong><span>Maximum project storage per user</span></div></div><div class="rule-card"><div class="rule-icon">📦</div><div><strong>ZIP DOWNLOAD</strong><span>Download your completed project as a ZIP</span></div></div><div class="rule-card"><div class="rule-icon">👁️</div><div><strong>SAFE PREVIEW</strong><span>Preview projects inside an isolated environment</span></div></div></div></div>
+  <div class="panel"><div class="panel-title">🔒 SECURITY RULES</div><div class="security-list"><div>✅ Users can only access their own projects.</div><div>✅ User code must run inside an isolated sandbox.</div><div>✅ User code cannot access ADAMI API keys or secrets.</div><div>✅ User code cannot access another user's project.</div><div>✅ Direct access to the ADAMI server is prohibited.</div><div>✅ Dangerous server commands are blocked.</div><div>✅ Malware, credential theft, attacks and abuse are prohibited.</div><div>✅ Excessive usage can automatically trigger rate limits.</div><div>✅ Projects violating the rules may be suspended.</div></div></div>
+  <div class="panel"><div class="panel-title">🚀 START A PROJECT</div><label class="field-label">PROJECT NAME</label><input id="codeProjectName" class="text-input" type="text" maxlength="80" placeholder="My First Website" autocomplete="off"><label class="field-label">WHAT DO YOU WANT TO BUILD?</label><textarea id="codeBuildPrompt" class="text-input" rows="6" maxlength="5000" placeholder="Example: Build a modern Nigerian business website with a homepage, about page, services page and contact page."></textarea><label class="field-label">PROGRAMMING LANGUAGE</label><select id="codeLanguage" class="text-input"><option value="html">HTML / CSS / JavaScript</option><option value="python">Python</option><option value="javascript">JavaScript</option><option value="typescript">TypeScript</option><option value="react">React</option><option value="nextjs">Next.js</option></select><div class="code-limit-box"><strong>STANDARD USER LIMITS</strong><div class="limit-row"><span>Active Projects</span><b>3</b></div><div class="limit-row"><span>AI Builds / Day</span><b>5</b></div><div class="limit-row"><span>Files / Project</span><b>30</b></div><div class="limit-row"><span>Code Size</span><b>100 KB</b></div><div class="limit-row"><span>Test Time</span><b>30 sec</b></div><div class="limit-row"><span>Storage</span><b>50 MB</b></div></div><button type="button" class="primary-btn" id="codeBuildButton" disabled style="opacity:.55;cursor:not-allowed;">🤖 BUILD WITH ADAMI AI</button><div class="note">🔐 Your project will be protected by ADAMI's server-side limits and isolated execution system.<br><br>AI Builder backend connection will be activated in the next development step.</div></div>
 </section>
 
 <script>
-
-/* =========================================
-   PAGE NAVIGATION
-========================================= */
-
-function showPage(pageId,button) {
-
-  document.querySelectorAll(".page").forEach(page => {
-    page.classList.remove("active");
-  });
-
-  document.getElementById(pageId).classList.add("active");
-
-  document.querySelectorAll(".tab").forEach(tab => {
-    tab.classList.remove("active");
-  });
-
-  if(button) button.classList.add("active");
-
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-/* =========================================
-   FLYER PHOTO
-========================================= */
-
+function showPage(pageId,button){ document.querySelectorAll(".page").forEach(page=>{page.classList.remove("active");}); document.getElementById(pageId).classList.add("active"); document.querySelectorAll(".tab").forEach(tab=>{tab.classList.remove("active");}); if(button) button.classList.add("active"); window.scrollTo({top:0,behavior:"smooth"}); }
 let flyerPhotoData = "";
-
-document.getElementById("photoInput").addEventListener("change",async function() {
-
-  const file = this.files[0];
-
-  if(!file) return;
-
-  if(!file.type.startsWith("image/")) {
-    alert("Please upload an image.");
-    return;
-  }
-
-  try {
-
-    flyerPhotoData = await compressImage(file,1600,0.9);
-
-    const preview = document.getElementById("photoPreview");
-
-    preview.src = flyerPhotoData;
-    preview.style.display = "block";
-
-    document.getElementById("photoEmpty").style.display = "none";
-
-    const background = document.getElementById("flyerPhoto");
-
-    background.style.display = "block";
-    background.style.backgroundImage = `url("${flyerPhotoData}")`;
-
-  } catch(error) {
-
-    alert("Unable to load this photo.");
-
-  }
-
-});
-
-/* =========================================
-   IMAGE COMPRESSION
-========================================= */
-
-function compressImage(file,maxSize,quality) {
-
-  return new Promise((resolve,reject) => {
-
-    const image = new Image();
-
-    const objectUrl = URL.createObjectURL(file);
-
-    image.onload = function() {
-
-      let width = image.width;
-      let height = image.height;
-
-      const ratio = Math.min(1,maxSize / Math.max(width,height));
-
-      width = Math.round(width * ratio);
-      height = Math.round(height * ratio);
-
-      const canvas = document.createElement("canvas");
-
-      canvas.width = width;
-      canvas.height = height;
-
-      const context = canvas.getContext("2d");
-
-      context.drawImage(image,0,0,width,height);
-
-      URL.revokeObjectURL(objectUrl);
-
-      resolve(canvas.toDataURL("image/jpeg",quality));
-
-    };
-
-    image.onerror = function() {
-
-      URL.revokeObjectURL(objectUrl);
-      reject(new Error("Image loading failed"));
-
-    };
-
-    image.src = objectUrl;
-
-  });
-
-}
-
-/* =========================================
-   FLYER DESIGN
-========================================= */
-
-function selectStyle(button,theme) {
-
-  document.querySelectorAll(".style").forEach(item => {
-    item.classList.remove("active");
-  });
-
-  button.classList.add("active");
-
-  document.getElementById("flyer").className = "theme-" + theme;
-
-  updateFlyer();
-
-}
-
-function fieldValue(id,fallback) {
-
-  const element = document.getElementById(id);
-
-  return element.value.trim() || fallback;
-
-}
-
-function updateFlyer() {
-
-  document.getElementById("outName").textContent =
-    fieldValue("name","YOUR NAME").toUpperCase();
-
-  document.getElementById("outEvent").textContent =
-    fieldValue("event","YOUR EVENT").toUpperCase();
-
-  document.getElementById("outMessage").textContent =
-    fieldValue("message","Your event message will appear here.");
-
-  document.getElementById("outDate").textContent =
-    "📅 " + fieldValue("date","DATE AND TIME");
-
-  document.getElementById("outVenue").textContent =
-    "📍 " + fieldValue("venue","VENUE");
-
-  const socials = [];
-
-  const youtube = document.getElementById("youtube").value.trim();
-
-  const twitter = document.getElementById("twitter").value.trim();
-
-  if(youtube) socials.push("YouTube: " + youtube);
-
-  if(twitter) socials.push("X: " + twitter);
-
-  document.getElementById("outSocial").textContent =
-    socials.join(" • ") || "ADAMI STUDIO";
-
-}
-
-/* =========================================
-   LIVE FLYER INPUTS
-========================================= */
-
-[
-  "name",
-  "event",
-  "date",
-  "venue",
-  "message",
-  "youtube",
-  "twitter"
-].forEach(id => {
-
-  document.getElementById(id).addEventListener("input",updateFlyer);
-
-});
-
-/* =========================================
-   DOWNLOAD FLYER PNG
-========================================= */
-
-async function downloadFlyer() {
-
-  const button = document.getElementById("downloadFlyerButton");
-
-  try {
-
-    button.disabled = true;
-    button.textContent = "CREATING FLYER...";
-
-    const canvas = await html2canvas(
-      document.getElementById("flyer"),
-      {
-        scale:3,
-        useCORS:true,
-        backgroundColor:"#080808"
-      }
-    );
-
-    const link = document.createElement("a");
-
-    link.download = "ADAMI-FLYER-" + Date.now() + ".png";
-
-    link.href = canvas.toDataURL("image/png");
-
-    link.click();
-
-  } catch(error) {
-
-    console.error(error);
-
-    alert("Flyer download failed. Please try again.");
-
-  } finally {
-
-    button.disabled = false;
-    button.textContent = "⬇ DOWNLOAD PNG";
-
-  }
-
-}
-
-/* =========================================
-   RESET FLYER
-========================================= */
-
-function resetFlyer() {
-
-  [
-    "name",
-    "event",
-    "date",
-    "venue",
-    "message",
-    "youtube",
-    "twitter"
-  ].forEach(id => {
-    document.getElementById(id).value = "";
-  });
-
-  document.getElementById("photoInput").value = "";
-
-  document.getElementById("photoPreview").style.display = "none";
-
-  document.getElementById("photoEmpty").style.display = "block";
-
-  document.getElementById("flyerPhoto").style.display = "none";
-
-  flyerPhotoData = "";
-
-  updateFlyer();
-
-}
-
-/* =========================================
-   CARTOON PHOTO
-========================================= */
-
+document.getElementById("photoInput").addEventListener("change",async function(){ const file=this.files[0]; if(!file) return; if(!file.type.startsWith("image/")){ alert("Please upload an image."); return; } try{ flyerPhotoData=await compressImage(file,1600,0.9); const preview=document.getElementById("photoPreview"); preview.src=flyerPhotoData; preview.style.display="block"; document.getElementById("photoEmpty").style.display="none"; const background=document.getElementById("flyerPhoto"); background.style.display="block"; background.style.backgroundImage=`url("${flyerPhotoData}")`; }catch(error){ alert("Unable to load this photo."); } });
+function compressImage(file,maxSize,quality){ return new Promise((resolve,reject)=>{ const image=new Image(); const objectUrl=URL.createObjectURL(file); image.onload=function(){ let width=image.width; let height=image.height; const ratio=Math.min(1,maxSize/Math.max(width,height)); width=Math.round(width*ratio); height=Math.round(height*ratio); const canvas=document.createElement("canvas"); canvas.width=width; canvas.height=height; const context=canvas.getContext("2d"); context.drawImage(image,0,0,width,height); URL.revokeObjectURL(objectUrl); resolve(canvas.toDataURL("image/jpeg",quality)); }; image.onerror=function(){ URL.revokeObjectURL(objectUrl); reject(new Error("Image loading failed")); }; image.src=objectUrl; }); }
+function selectStyle(button,theme){ document.querySelectorAll(".style").forEach(item=>{item.classList.remove("active");}); button.classList.add("active"); document.getElementById("flyer").className="theme-"+theme; updateFlyer(); }
+function fieldValue(id,fallback){ const element=document.getElementById(id); return element.value.trim()||fallback; }
+function updateFlyer(){ document.getElementById("outName").textContent=fieldValue("name","YOUR NAME").toUpperCase(); document.getElementById("outEvent").textContent=fieldValue("event","YOUR EVENT").toUpperCase(); document.getElementById("outMessage").textContent=fieldValue("message","Your event message will appear here."); document.getElementById("outDate").textContent="📅 "+fieldValue("date","DATE AND TIME"); document.getElementById("outVenue").textContent="📍 "+fieldValue("venue","VENUE"); const socials=[]; const youtube=document.getElementById("youtube").value.trim(); const twitter=document.getElementById("twitter").value.trim(); if(youtube) socials.push("YouTube: "+youtube); if(twitter) socials.push("X: "+twitter); document.getElementById("outSocial").textContent=socials.join(" • ")||"ADAMI STUDIO"; }
+["name","event","date","venue","message","youtube","twitter"].forEach(id=>{ document.getElementById(id).addEventListener("input",updateFlyer); });
+async function downloadFlyer(){ const button=document.getElementById("downloadFlyerButton"); try{ button.disabled=true; button.textContent="CREATING FLYER..."; const canvas=await html2canvas(document.getElementById("flyer"),{scale:3,useCORS:true,backgroundColor:"#080808"}); const link=document.createElement("a"); link.download="ADAMI-FLYER-"+Date.now()+".png"; link.href=canvas.toDataURL("image/png"); link.click(); }catch(error){ console.error(error); alert("Flyer download failed. Please try again."); }finally{ button.disabled=false; button.textContent="⬇ DOWNLOAD PNG"; } }
+function resetFlyer(){ ["name","event","date","venue","message","youtube","twitter"].forEach(id=>{document.getElementById(id).value="";}); document.getElementById("photoInput").value=""; document.getElementById("photoPreview").style.display="none"; document.getElementById("photoEmpty").style.display="block"; document.getElementById("flyerPhoto").style.display="none"; flyerPhotoData=""; updateFlyer(); }
 let cartoonPhotoData = "";
-
-document.getElementById("cartoonPhoto").addEventListener("change",async function() {
-
-  const file = this.files[0];
-
-  if(!file) return;
-
-  if(!file.type.startsWith("image/")) {
-
-    alert("Please select a valid image.");
-
-    this.value = "";
-
-    return;
-
-  }
-
-  try {
-
-    cartoonPhotoData = await compressImage(file,1600,0.85);
-
-    const preview = document.getElementById("cartoonPhotoPreview");
-
-    preview.src = cartoonPhotoData;
-
-    preview.style.display = "block";
-
-    document.getElementById("cartoonEmpty").style.display = "none";
-
-  } catch(error) {
-
-    alert("Unable to process this photo.");
-
-  }
-
-});
-
-/* =========================================
-   ADMIN UNLOCK
-========================================= */
-
+document.getElementById("cartoonPhoto").addEventListener("change",async function(){ const file=this.files[0]; if(!file) return; if(!file.type.startsWith("image/")){ alert("Please select a valid image."); this.value=""; return; } try{ cartoonPhotoData=await compressImage(file,1600,0.85); const preview=document.getElementById("cartoonPhotoPreview"); preview.src=cartoonPhotoData; preview.style.display="block"; document.getElementById("cartoonEmpty").style.display="none"; }catch(error){ alert("Unable to process this photo."); } });
 let adminUnlocked = false;
-
 let selectedDuration = 10;
-
-async function unlockAdmin() {
-
-  const token = document.getElementById("adminToken").value.trim();
-
-  const message = document.getElementById("adminMessage");
-
-  if(!token) {
-
-    alert("Enter your admin access token.");
-
-    return;
-
-  }
-
-  message.textContent = "Checking admin access...";
-
-  try {
-
-    const response = await fetch(
-      "/api/cartoon/admin/unlock",
-      {
-        method:"POST",
-        credentials:"same-origin",
-        headers:{
-          "Content-Type":"application/json"
-        },
-        body:JSON.stringify({token})
-      }
-    );
-
-    const data = await response.json();
-
-    if(!response.ok || !data.ok) {
-
-      adminUnlocked = false;
-
-      document.getElementById("adminDurations").classList.remove("show");
-
-      throw new Error(data.error || "Admin verification failed.");
-
-    }
-
-    adminUnlocked = true;
-
-    document.getElementById("adminDurations").classList.add("show");
-
-    message.textContent = "✓ Admin access verified.";
-
-  } catch(error) {
-
-    message.textContent = "✕ " + error.message;
-
-  }
-
-}
-
-/* =========================================
-   VIDEO DURATION
-========================================= */
-
-function selectDuration(seconds,button) {
-
-  if(seconds > 10 && !adminUnlocked) {
-
-    alert("Admin access required.");
-
-    return;
-
-  }
-
-  selectedDuration = seconds;
-
-  document.querySelectorAll(".duration").forEach(item => {
-    item.classList.remove("active");
-  });
-
-  if(button) button.classList.add("active");
-
-}
-
-/* =========================================
-   GENERATE REAL RUNWAY VIDEO
-========================================= */
-
+async function unlockAdmin(){ const token=document.getElementById("adminToken").value.trim(); const message=document.getElementById("adminMessage"); if(!token){ alert("Enter your admin access token."); return; } message.textContent="Checking admin access..."; try{ const response=await fetch("/api/cartoon/admin/unlock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({token})}); const data=await response.json(); if(!response.ok||!data.ok){ adminUnlocked=false; document.getElementById("adminDurations").classList.remove("show"); throw new Error(data.error||"Admin verification failed."); } adminUnlocked=true; document.getElementById("adminDurations").classList.add("show"); message.textContent="✓ Admin access verified."; }catch(error){ message.textContent="✕ "+error.message; } }
+function selectDuration(seconds,button){ if(seconds>10&&!adminUnlocked){ alert("Admin access required."); return; } selectedDuration=seconds; document.querySelectorAll(".duration").forEach(item=>{item.classList.remove("active");}); if(button) button.classList.add("active"); }
 let currentVideoUrl = "";
-
-async function generateCartoon() {
-
-  if(!cartoonPhotoData) {
-
-    alert("Please upload a character photo.");
-
-    return;
-
-  }
-
-  if(selectedDuration > 10 && !adminUnlocked) {
-
-    alert("Admin access required.");
-
-    return;
-
-  }
-
-  const button = document.getElementById("generateButton");
-
-  const status = document.getElementById("status");
-
-  button.disabled = true;
-
-  button.textContent = "GENERATING...";
-
-  status.style.display = "block";
-
-  status.innerHTML =
-    '<span class="spinner"></span> Sending your character to Runway AI. Please wait...';
-
-  document.getElementById("videoResult").style.display = "none";
-
-  document.getElementById("videoEmpty").style.display = "block";
-
-  try {
-
-    const response = await fetch(
-      "/api/cartoon/generate",
-      {
-        method:"POST",
-        credentials:"same-origin",
-        headers:{
-          "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-
-          image:cartoonPhotoData,
-
-          style:document.getElementById("cartoonStyle").value,
-
-          script:document.getElementById("dramaScript").value,
-
-          direction:document.getElementById("direction").value,
-
-          voice:document.getElementById("voice").value,
-
-          emotion:document.getElementById("emotion").value,
-
-          duration:selectedDuration
-
-        })
-
-      }
-    );
-
-    const data = await response.json();
-
-    if(!response.ok) {
-
-      throw new Error(
-        data.error || "AI video generation failed."
-      );
-
-    }
-
-    const videoUrl = data.videoUrl || data.video_url;
-
-    if(!videoUrl) {
-
-      throw new Error("Runway did not return a video URL.");
-
-    }
-
+async function generateCartoon(){
+  if(!cartoonPhotoData){ alert("Please upload a character photo."); return; }
+  if(selectedDuration>10&&!adminUnlocked){ alert("Admin access required."); return; }
+  const scriptText=document.getElementById("dramaScript").value.trim();
+  if(adminUnlocked&&!scriptText){ alert("Admin video needs a Drama Script for Naija voice. Write what character should say."); return; }
+  if(!adminUnlocked&&scriptText&&scriptText.split(/\s+/).length>25){ alert("Public 10-second video: keep script under 25 words or voice go cut. Use: My people, una don hear? Amara don come back."); return; }
+  const button=document.getElementById("generateButton");
+  const status=document.getElementById("status");
+  button.disabled=true; button.textContent="GENERATING...";
+  status.style.display="block";
+  status.innerHTML='<span class="spinner"></span> Sending your character to Runway AI. Please wait...';
+  document.getElementById("videoResult").style.display="none";
+  document.getElementById("videoEmpty").style.display="block";
+  try{
+    const response=await fetch("/api/cartoon/generate",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({image:cartoonPhotoData,style:document.getElementById("cartoonStyle").value,script:scriptText,direction:document.getElementById("direction").value,voice:document.getElementById("voice").value,emotion:document.getElementById("emotion").value,duration:selectedDuration})});
+    const data=await response.json();
+    if(!response.ok) throw new Error(data.error||"AI video generation failed.");
+    const videoUrl=data.videoUrl||data.video_url;
+    if(!videoUrl) throw new Error("Runway did not return a video URL.");
     showVideo(videoUrl);
-
-    status.style.display = "none";
-
-  } catch(error) {
-
-    console.error(error);
-
-    status.textContent = "❌ " + error.message;
-
-  } finally {
-
-    button.disabled = false;
-
-    button.textContent = "🎬 GENERATE REAL AI VIDEO";
-
-  }
-
+    status.style.display="block";
+    status.textContent=data.is_single_mp4 ? "✅ Single MP4 ready with Naija voice. Press play and turn volume up." : "Video ready.";
+  }catch(error){ console.error(error); status.textContent="❌ "+error.message; }
+  finally{ button.disabled=false; button.textContent="🎬 GENERATE REAL AI VIDEO"; }
 }
-
-/* =========================================
-   DISPLAY GENERATED VIDEO
-========================================= */
-
-function showVideo(url) {
-
-  currentVideoUrl = url;
-
-  const video = document.getElementById("resultVideo");
-
-  video.src = url;
-
-  document.getElementById("videoEmpty").style.display = "none";
-
-  document.getElementById("videoResult").style.display = "block";
-
+function showVideo(url){
+  currentVideoUrl=url;
+  const video=document.getElementById("resultVideo");
+  video.src=url;
+  video.muted=false;
+  video.volume=1.0;
+  video.setAttribute("playsinline","");
+  document.getElementById("videoEmpty").style.display="none";
+  document.getElementById("videoResult").style.display="block";
+  video.play().catch(()=>{});
 }
-
-/* =========================================
-   DOWNLOAD GENERATED VIDEO
-========================================= */
-
-function downloadVideo() {
-
-  if(!currentVideoUrl) {
-
-    alert("No video is available.");
-
-    return;
-
-  }
-
-  const link = document.createElement("a");
-
-  link.href = currentVideoUrl;
-
-  link.target = "_blank";
-
-  link.rel = "noopener";
-
-  link.download = "ADAMI-AI-VIDEO-" + Date.now() + ".mp4";
-
-  document.body.appendChild(link);
-
-  link.click();
-
-  link.remove();
-
+function downloadVideo(){
+  if(!currentVideoUrl){ alert("No video is available."); return; }
+  const link=document.createElement("a");
+  link.href=currentVideoUrl;
+  link.download="ADAMI-AI-VIDEO-"+Date.now()+".mp4";
+  document.body.appendChild(link); link.click(); link.remove();
 }
-
-/* =========================================
-   NEW VIDEO
-========================================= */
-
-function newVideo() {
-
-  const video = document.getElementById("resultVideo");
-
-  video.pause();
-
-  video.removeAttribute("src");
-
-  video.load();
-
-  currentVideoUrl = "";
-
-  document.getElementById("videoResult").style.display = "none";
-
-  document.getElementById("videoEmpty").style.display = "block";
-
-  document.getElementById("status").style.display = "none";
-
+function newVideo(){
+  const video=document.getElementById("resultVideo");
+  video.pause(); video.removeAttribute("src"); video.load();
+  currentVideoUrl="";
+  document.getElementById("videoResult").style.display="none";
+  document.getElementById("videoEmpty").style.display="block";
+  document.getElementById("status").style.display="none";
 }
-
-/* =========================================
-   INITIALIZE
-========================================= */
-
 updateFlyer();
-
 </script>
-
 </body>
 </html>
