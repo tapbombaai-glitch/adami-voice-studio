@@ -81,7 +81,7 @@ button { cursor:pointer; }
 .admin-box h3 { font-size:12px; color:var(--gold-light); margin-bottom:10px; }
 .admin-durations { display:none; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
 .admin-durations.show { display:grid; }
-.duration { width:100%; background:#090909; border:1px solid #333; color:#aaa; padding:12px; border-radius:10px; font-weight:900; }
+.duration { width:100%; background:#090909; border:1px solid #333; color:#aaa; padding:12px; border-radius:10px; font-weight:900; margin-bottom:8px; }
 .duration.active { color:#090909; background:linear-gradient(135deg,#ffe09a,#bd8422); }
 .status { display:none; padding:13px; margin-top:12px; border:1px solid #444; background:#090909; color:#ddd; border-radius:10px; font-size:11px; line-height:1.5; }
 .spinner { display:inline-block; width:15px; height:15px; border:2px solid #555; border-top-color:#ffe09a; border-radius:50%; animation:spin .8s linear infinite; vertical-align:middle; margin-right:7px; }
@@ -172,8 +172,10 @@ button { cursor:pointer; }
       <div class="voice-card"><strong>Warri Babe — Female</strong><small>Female Nigerian Pidgin voice</small></div>
       <div class="field"><label>SELECT VOICE</label><select id="voice"><option value="main-naija-pidgin">Main Naija Pidgin — Male</option><option value="warri-babe">Warri Babe — Female</option><option value="custom">Custom Voice</option></select></div>
       <div class="field"><label>CHARACTER EMOTION</label><select id="emotion"><option value="Natural">Natural</option><option value="Scared">Scared — Fear / Horror</option><option value="Happy">Happy</option><option value="Funny">Funny</option><option value="Serious">Serious</option><option value="Angry">Angry</option><option value="Excited">Excited</option><option value="Sad">Sad</option><option value="Surprised">Surprised</option></select></div>
-      <div class="panel-title" style="margin-top:18px">PUBLIC VIDEO</div>
-      <button class="duration active" id="publicDuration" onclick="selectDuration(10,this)">🎬 10 SECONDS — PUBLIC</button>
+      <div class="panel-title" style="margin-top:18px">VIDEO LENGTH — PUBLIC</div>
+      <button class="duration active" onclick="selectDuration(10,this)">🎬 10 SECONDS</button>
+      <button class="duration" onclick="selectDuration(20,this)">🎬 20 SECONDS</button>
+      <button class="duration" onclick="selectDuration(30,this)">🎬 30 SECONDS — FOR AMARA STORY</button>
       <div class="admin-box">
         <h3>🔐 CHAIRMAN / ADMIN STUDIO</h3>
         <div class="field"><label>ADMIN ACCESS TOKEN</label><input id="adminToken" type="password" placeholder="Enter your private admin token"></div>
@@ -221,14 +223,14 @@ document.getElementById("cartoonPhoto").addEventListener("change",async function
 let adminUnlocked = false;
 let selectedDuration = 10;
 async function unlockAdmin(){ const token=document.getElementById("adminToken").value.trim(); const message=document.getElementById("adminMessage"); if(!token){ alert("Enter your admin access token."); return; } message.textContent="Checking admin access..."; try{ const response=await fetch("/api/cartoon/admin/unlock",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({token})}); const data=await response.json(); if(!response.ok||!data.ok){ adminUnlocked=false; document.getElementById("adminDurations").classList.remove("show"); throw new Error(data.error||"Admin verification failed."); } adminUnlocked=true; document.getElementById("adminDurations").classList.add("show"); message.textContent="✓ Admin access verified."; }catch(error){ message.textContent="✕ "+error.message; } }
-function selectDuration(seconds,button){ if(seconds>10&&!adminUnlocked){ alert("Admin access required."); return; } selectedDuration=seconds; document.querySelectorAll(".duration").forEach(item=>{item.classList.remove("active");}); if(button) button.classList.add("active"); }
+function selectDuration(seconds,button){ if(seconds>30&&!adminUnlocked){ alert("Admin access required."); return; } selectedDuration=seconds; document.querySelectorAll(".duration").forEach(item=>{item.classList.remove("active");}); if(button) button.classList.add("active"); }
 let currentVideoUrl = "";
 async function generateCartoon(){
   if(!cartoonPhotoData){ alert("Please upload a character photo."); return; }
-  if(selectedDuration>10&&!adminUnlocked){ alert("Admin access required."); return; }
+  if(selectedDuration>30&&!adminUnlocked){ alert("Admin access required."); return; }
   const scriptText=document.getElementById("dramaScript").value.trim();
   if(adminUnlocked&&!scriptText){ alert("Admin video needs a Drama Script for Naija voice. Write what character should say."); return; }
-  if(!adminUnlocked&&scriptText&&scriptText.split(/\s+/).length>25){ alert("Public 10-second video: keep script under 25 words or voice go cut. Use: My people, una don hear? Amara don come back."); return; }
+  if(!adminUnlocked&&scriptText&&scriptText.split(/\s+/).length>70){ alert("For 30 seconds, keep script under 70 words or voice go cut."); return; }
   const button=document.getElementById("generateButton");
   const status=document.getElementById("status");
   button.disabled=true; button.textContent="GENERATING...";
